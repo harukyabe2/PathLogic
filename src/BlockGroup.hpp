@@ -18,8 +18,8 @@ class BlockGroup
 		const Array<Point>& GetTiles() const { return mTiles; }
 		Point GetPivot() const { return mPivot; }
 
-		void SetTiles(const Array<Point>& tiles);
-		void SetPivot(const Point& pivot);
+		void SetTiles(const Array<Point>& tiles) { mTiles = tiles; }
+		void SetPivot(const Point& pivot) { mPivot = pivot; }
 
 	private:
 		int32 mID;

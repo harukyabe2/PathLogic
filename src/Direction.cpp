@@ -26,3 +26,16 @@ Point GetOffset(Direction dir)
 
 	return { 0, 0 };
 }
+
+double GetBaseAngle(Direction dir)
+{
+	switch (dir)
+	{
+		case Direction::Up: return 0.0;
+		case Direction::Right: return Math::HalfPi;
+		case Direction::Down: return Math::Pi;
+		case Direction::Left: return -Math::HalfPi;
+	}
+
+	return 0.0;
+}

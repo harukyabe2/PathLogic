@@ -1,0 +1,21 @@
+{
+  "width": 5,
+  "height": 5,
+  "tiles": [
+    { "x": 1, "y": 0, "type": "Normal", "direction": "Right" },
+    { "x": 2, "y": 0, "type": "Arrow", "direction": "Up" },
+    { "x": 4, "y": 2, "type": "Normal", "direction": "Up" }
+  ],
+  "groups": [
+    {
+      "id": 1,
+      "type": "Rotate",
+      "pivot": { "x": 2, "y": 2 },
+      "tiles": [
+        { "x": 2, "y": 1, "type": "Normal", "direction": "Up" },
+        { "x": 1, "y": 2, "type": "Normal", "direction": "Up" },
+        { "x": 2, "y": 2, "type": "Arrow", "direction": "Down" }
+      ]
+    }
+  ]
+}

@@ -3,6 +3,9 @@
 #include "Common.hpp"
 #include "CameraController.hpp"
 #include "Board.hpp"
+#include "BoardRenderer.hpp"
+#include "StageLoader.hpp"
+#include "Player.hpp"
 
 enum class GameState
 {
@@ -31,9 +34,13 @@ class Game : public App::Scene
 		CameraController mCameraController;
 
 		Board mBoard;
+		BoardRenderer mRenderer;
+
+		Player mPlayer;
 
 		bool mIsMouseRUp;
 		bool mIsMouseRDown;
+		bool mIsMouseLDown;
 };
 
 

@@ -8,6 +8,8 @@ class CameraController
 
 		void Update(const bool isMouseRUp, const bool isMouseRDown);
 
+		Ray GetMouseRay() const { return mCamera.screenToRay(Cursor::PosF()); }
+
 	private:
 		Vec2 mCursorPos;
 

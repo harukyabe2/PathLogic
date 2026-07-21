@@ -18,5 +18,5 @@ void Title::draw() const
 {
 	Scene::SetBackground(Palette::Black);
 
-	FontAsset(U"UI")(U"Shift Path").drawAt(Scene::Center(), Palette::White);
+	FontAsset(U"UI")(U"Path Logic").drawAt(Scene::Center(), Palette::White);
 }

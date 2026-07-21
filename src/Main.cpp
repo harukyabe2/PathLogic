@@ -41,6 +41,7 @@ void LoadData()
 {
 	FontAsset::Register(U"UI", FontMethod::MSDF, 48, Typeface::Bold);
 
+
 	//TextureAsset::Register(U"", Resource(U"imgs/.png"));
 
 	//AudioAsset::Register(U"", Resource(U"sounds/.wav"));

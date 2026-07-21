@@ -119,6 +119,7 @@
   <ItemGroup>
     <ClCompile Include="src\BlockGroup.cpp" />
     <ClCompile Include="src\Board.cpp" />
+    <ClCompile Include="src\BoardRenderer.cpp" />
     <ClCompile Include="src\CameraController.cpp" />
     <ClCompile Include="src\Direction.cpp" />
     <ClCompile Include="src\Game.cpp" />
@@ -339,6 +340,7 @@
   <ItemGroup>
     <ClInclude Include="src\BlockGroup.hpp" />
     <ClInclude Include="src\Board.hpp" />
+    <ClInclude Include="src\BoardRenderer.hpp" />
     <ClInclude Include="src\CameraController.hpp" />
     <ClInclude Include="src\Common.hpp" />
     <ClInclude Include="src\Direction.hpp" />
@@ -348,6 +350,7 @@
     <ClInclude Include="src\StageLoader.hpp" />
     <ClInclude Include="src\Tile.hpp" />
     <ClInclude Include="src\Title.hpp" />
+    <ClInclude Include="src\Utils.hpp" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <ItemGroup>
