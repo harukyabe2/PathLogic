@@ -9,6 +9,7 @@ Game::Game(const InitData& init)
 	, mCameraController(mRenderTexture.size())
 	, mBoard({ 0, 0 })
 	, mRenderer()
+	, mPlayerRenderer()
 	, mIsMouseRUp(false)
 	, mIsMouseRDown(false)
 	, mIsMouseLDown(false)
@@ -33,7 +34,7 @@ void Game::draw() const
 		if (mPlayer.GetState() == PlayerState::Placed || mPlayer.GetState() == PlayerState::Walking)
 		{
 			Vec3 playerWorldPos = mBoard.ToWorldPosition(mPlayer.GetBoardPos());
-			mPlayer.Draw3D(playerWorldPos);
+			mPlayerRenderer.Draw3D(mPlayer, mBoard);
 		}
 
 		Line3D{ Vec3{ 0, -5, -100 }, Vec3{ 0, -5, 100} }.draw();
@@ -45,7 +46,7 @@ void Game::draw() const
 	Shader::LinearToScreen(mRenderTexture);
 
 	// 2D描画
-	mPlayer.DrawUI();
+	mPlayerRenderer.DrawUI(mPlayer);
 }
 
 void Game::ProcessInput()
@@ -141,7 +142,7 @@ void Game::UpdateGame()
 					Point newPlayerPos = Utils::RotatePointRight(playerPos, pivot2D);
 
 					Vec3 targetWorldPos = mBoard.ToWorldPosition(newPlayerPos);
-					mPlayer.StartRotationAnim(pivot3D, targetWorldPos, -Math::HalfPi, 0.0);
+					mPlayerRenderer.StartRotationAnim(pivot3D, targetWorldPos, -Math::HalfPi, 0.0);
 
 					mPlayer.SetBoardPos(newPlayerPos);
 					mPlayer.SetDirection(RotateRight(mPlayer.GetDirection()));
@@ -156,4 +157,5 @@ void Game::UpdateGame()
 	}
 
 	mRenderer.Update();
+	mPlayerRenderer.Update();
 }

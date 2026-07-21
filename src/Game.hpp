@@ -6,6 +6,7 @@
 #include "BoardRenderer.hpp"
 #include "StageLoader.hpp"
 #include "Player.hpp"
+#include "PlayerRenderer.hpp"
 
 enum class GameState
 {
@@ -37,6 +38,7 @@ class Game : public App::Scene
 		BoardRenderer mRenderer;
 
 		Player mPlayer;
+		PlayerRenderer mPlayerRenderer;
 
 		bool mIsMouseRUp;
 		bool mIsMouseRDown;

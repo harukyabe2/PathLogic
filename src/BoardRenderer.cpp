@@ -44,6 +44,10 @@ void BoardRenderer::Draw(const Board& board) const
 			{
 				Box(board.ToWorldPosition({ x, y }), {1.47, 0.3, 1.47}).draw();
 			}
+			else if (type == TileType::Goal)
+			{
+				Box(board.ToWorldPosition({ x, y }), {1.47, 0.3, 1.47}).draw(Linear::Palette::Blueviolet);
+			}
 			else if (type == TileType::Arrow)
 			{
 				double baseAngle = GetBaseAngle(tile.GetDirection());

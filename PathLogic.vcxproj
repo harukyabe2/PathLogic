@@ -126,6 +126,7 @@
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\Player.cpp" />
     <ClCompile Include="src\PlayerManager.cpp" />
+    <ClCompile Include="src\PlayerRenderer.cpp" />
     <ClCompile Include="src\StageLoader.cpp" />
     <ClCompile Include="src\Tile.cpp" />
     <ClCompile Include="src\Title.cpp" />
@@ -347,6 +348,7 @@
     <ClInclude Include="src\Game.hpp" />
     <ClInclude Include="src\Player.hpp" />
     <ClInclude Include="src\PlayerManager.hpp" />
+    <ClInclude Include="src\PlayerRenderer.hpp" />
     <ClInclude Include="src\StageLoader.hpp" />
     <ClInclude Include="src\Tile.hpp" />
     <ClInclude Include="src\Title.hpp" />
