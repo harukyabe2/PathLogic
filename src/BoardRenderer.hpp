@@ -25,6 +25,8 @@ class BoardRenderer
 		void AddRotationAnim(int32 groupID, const Vec3& pivotWorldPos, double startAngle, double endAngle);
 
 	private:
+		void DrawSingleTile(const Tile& tile, const Vec3& pos, double angleOffset) const;
+
 		Array<GroupAnimState> mAnims;
 
 		Model mArrowBox;

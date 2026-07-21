@@ -8,10 +8,11 @@ Game::Game(const InitData& init)
 	, mRenderTexture(Scene::Size(), TextureFormat::R8G8B8A8_Unorm_SRGB, HasDepth::Yes)
 	, mCameraController(mRenderTexture.size())
 	, mBoard({ 0, 0 })
-	, mRenderer()
+	, mBoardRenderer()
 	, mPlayerRenderer()
 	, mIsMouseRUp(false)
 	, mIsMouseRDown(false)
+	, mIsMouseLUp(false)
 	, mIsMouseLDown(false)
 {
 	mBoard = StageLoader::Load(U"stage.json");
@@ -29,13 +30,9 @@ void Game::draw() const
 	{
 		const ScopedRenderTarget3D target{ mRenderTexture.clear(mBackgroundColor) };
 
-		mRenderer.Draw(mBoard);
+		mBoardRenderer.Draw(mBoard);
 
-		if (mPlayer.GetState() == PlayerState::Placed || mPlayer.GetState() == PlayerState::Walking)
-		{
-			Vec3 playerWorldPos = mBoard.ToWorldPosition(mPlayer.GetBoardPos());
-			mPlayerRenderer.Draw3D(mPlayer, mBoard);
-		}
+		mPlayerRenderer.Draw3D(mPlayer, mBoard);
 
 		Line3D{ Vec3{ 0, -5, -100 }, Vec3{ 0, -5, 100} }.draw();
 		Line3D{ Vec3{ -100, -5, 0 }, Vec3{ 100, -5, 0 } }.draw();
@@ -53,6 +50,7 @@ void Game::ProcessInput()
 {
 	mIsMouseRUp = MouseR.up();
 	mIsMouseRDown = MouseR.down();
+	mIsMouseLUp = MouseL.up();
 	mIsMouseLDown = MouseL.down();
 }
 
@@ -64,10 +62,8 @@ void Game::UpdateGame()
 
 	const Ray ray = mCameraController.GetMouseRay();
 
-	// プレイヤーをつかんでいる状態から離したとき、
-	// 通常のタイルの位置ならそこに配置
-	// 特殊なタイルの位置なら元の位置に戻す
-	if (mPlayer.GetState() == PlayerState::Dragging && MouseL.up())
+	// つかんでいるプレイヤーを離したとき
+	if (mPlayer.GetState() == PlayerState::Dragging && mIsMouseLUp)
 	{
 		bool isPlaced = false;
 
@@ -75,6 +71,7 @@ void Game::UpdateGame()
 		{
 			const Tile& tile = mBoard.GetTile(*hitPos);
 			
+			// マウスカーソルの指す位置が通常のタイルならそこに配置
 			if (tile.GetType() == TileType::Normal)
 			{
 				mPlayer.SetBoardPos(*hitPos);
@@ -84,6 +81,7 @@ void Game::UpdateGame()
 			}
 		}
 
+		// 通常のタイル以外の位置なら元のUIの位置に戻す
 		if (!isPlaced)
 		{
 			mPlayer.SetState(PlayerState::InUI);
@@ -91,11 +89,12 @@ void Game::UpdateGame()
 		}
 	}
 
+	// プレイヤーをつかんでいない状態で左クリックしたとき
 	if (mIsMouseLDown && mPlayer.GetState() != PlayerState::Dragging)
 	{
 		bool isPlayerPickedUp = false;
 
-		// 配置してからの置き直し処理
+		// すでに置かれているプレイヤーをつかみ直す
 		if (mPlayer.GetState() == PlayerState::Placed)
 		{
 			Vec3 playerWorldPos = mBoard.ToWorldPosition(mPlayer.GetBoardPos());
@@ -105,18 +104,19 @@ void Game::UpdateGame()
 			{
 				mPlayer.SetState(PlayerState::Dragging);
 				isPlayerPickedUp = true;
-
 			}
 		}
 
 		if (!isPlayerPickedUp)
 		{
+			// 回転・移動に対応したブロックを左クリックしたとき
 			if (auto clickedGroupID = mBoard.Raycast(ray))
 			{
 				Point pivot2D;
 				bool isPlayerOnGroup = false;
 
-				for (const auto& group : mBoard.GetGroups()) {
+				for (const auto& group : mBoard.GetGroups())
+				{
 					if (group.GetID() == *clickedGroupID)
 					{
 						pivot2D = group.GetPivot();
@@ -134,10 +134,12 @@ void Game::UpdateGame()
 					}
 				}
 
+				Vec3 pivot3D = mBoard.ToWorldPosition(pivot2D);
+
+				// 回転・移動するブロック上にプレイヤーがいた場合は同時に動かす
 				if (isPlayerOnGroup && mPlayer.GetState() == PlayerState::Placed)
 				{
 					Point playerPos = mPlayer.GetBoardPos();
-					Vec3 pivot3D = mBoard.ToWorldPosition(pivot2D);
 
 					Point newPlayerPos = Utils::RotatePointRight(playerPos, pivot2D);
 
@@ -148,14 +150,12 @@ void Game::UpdateGame()
 					mPlayer.SetDirection(RotateRight(mPlayer.GetDirection()));
 				}
 
-				Vec3 pivot3D = mBoard.ToWorldPosition(pivot2D);
-
 				mBoard.RotateGroup(*clickedGroupID);
-				mRenderer.AddRotationAnim(*clickedGroupID, pivot3D, -Math::HalfPi, 0.0);
+				mBoardRenderer.AddRotationAnim(*clickedGroupID, pivot3D, -Math::HalfPi, 0.0);
 			}
 		}
 	}
 
-	mRenderer.Update();
+	mBoardRenderer.Update();
 	mPlayerRenderer.Update();
 }

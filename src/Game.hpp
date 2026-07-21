@@ -35,13 +35,14 @@ class Game : public App::Scene
 		CameraController mCameraController;
 
 		Board mBoard;
-		BoardRenderer mRenderer;
+		BoardRenderer mBoardRenderer;
 
 		Player mPlayer;
 		PlayerRenderer mPlayerRenderer;
 
 		bool mIsMouseRUp;
 		bool mIsMouseRDown;
+		bool mIsMouseLUp;
 		bool mIsMouseLDown;
 };
 

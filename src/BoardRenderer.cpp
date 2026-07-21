@@ -34,26 +34,12 @@ void BoardRenderer::Draw(const Board& board) const
 		for (int x = 0; x < size.x; ++x)
 		{
 			const Tile& tile = board.GetTile({ x, y });
-			// Emptyのタイルあるいは
-			// アニメーション中のタイルはスキップ
-			TileType type = tile.GetType();
-			if (type == TileType::Empty) continue;
+
+			// Emptyあるいはアニメーション中のタイルはスキップ
+			if (tile.GetType() == TileType::Empty) continue;
 			if (isAnimating(tile.GetGroupID())) continue;
 
-			if (type == TileType::Normal)
-			{
-				Box(board.ToWorldPosition({ x, y }), {1.47, 0.3, 1.47}).draw();
-			}
-			else if (type == TileType::Goal)
-			{
-				Box(board.ToWorldPosition({ x, y }), {1.47, 0.3, 1.47}).draw(Linear::Palette::Blueviolet);
-			}
-			else if (type == TileType::Arrow)
-			{
-				double baseAngle = GetBaseAngle(tile.GetDirection());
-				
-				mArrowBox.draw(board.ToWorldPosition({ x, y }), Quaternion::RotateY(baseAngle));
-			}
+			DrawSingleTile(tile, board.ToWorldPosition({ x, y }), 0.0);
 		}
 	}
 
@@ -64,35 +50,18 @@ void BoardRenderer::Draw(const Board& board) const
 		double e = EaseOutExpo(progress);
 		double angle = Math::Lerp(anim.startAngle, anim.endAngle, e);
 
-		double c = std::cos(angle);
-		double s = std::sin(angle);
-
 		for (const auto& group : board.GetGroups())
 		{
 			if (group.GetID() != anim.groupID) continue;
 			
 			for (const auto& pos : group.GetTiles())
 			{
-				Vec3 finalCenter = board.ToWorldPosition(pos);
-
-				Vec3 currentCenter = Utils::CalcOrbitPosition(anim.pivotWorldPos, finalCenter, angle);
+				Vec3 center = board.ToWorldPosition(pos);
+				Vec3 currentCenter = Utils::CalcOrbitPosition(anim.pivotWorldPos, center, angle);
 				
 				const Tile& tile = board.GetTile(pos);
-				TileType type = tile.GetType();
 
-				double baseAngle = GetBaseAngle(tile.GetDirection());
-				// 移動した先でタイルがどちらを向いているかを計算
-				double tileRotation = baseAngle + angle;
-
-				if (type == TileType::Normal)
-				{
-					OrientedBox{ currentCenter, {1.47, 0.3, 1.47}, Quaternion::RotateY(tileRotation) }.draw();
-				}
-				else if (type == TileType::Arrow)
-				{
-					
-					mArrowBox.draw(currentCenter, Quaternion::RotateY(tileRotation));
-				}
+				DrawSingleTile(tile, currentCenter, angle);
 			}
 			break;
 		}
@@ -104,3 +73,24 @@ void BoardRenderer::AddRotationAnim(int32 groupID, const Vec3& pivotWorldPos, do
 	mAnims.push_back({ groupID, 0.0, 0.25, pivotWorldPos, startAngle, endAngle });
 }
 
+void BoardRenderer::DrawSingleTile(const Tile& tile, const Vec3& pos, double angleOffset) const
+{
+	TileType type = tile.GetType();
+
+	// ベースの向きにアニメーション分の追加角度を足す（通常時は0）
+	double baseAngle = GetBaseAngle(tile.GetDirection());
+	double finalAngle = baseAngle + angleOffset;
+
+	if (type == TileType::Normal)
+	{
+		OrientedBox{ pos, { 1.47, 0.3, 1.47 }, Quaternion::RotateY(finalAngle) }.draw();
+	}
+	else if (type == TileType::Goal)
+	{
+		OrientedBox{ pos, { 1.47, 0.3, 1.47 }, Quaternion::RotateY(finalAngle) }.draw(Linear::Palette::Blueviolet);
+	}
+	else if (type == TileType::Arrow)
+	{
+		mArrowBox.draw(pos, Quaternion::RotateY(finalAngle));
+	}
+}

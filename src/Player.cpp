@@ -13,7 +13,7 @@ Player::Player()
 
 void Player::Update()
 {
-	// 初期位置と掴んでいる間は2Dで表示
+	// 初期位置とつかんでいる間は2Dで表示
 	if (mState == PlayerState::InUI || mState == PlayerState::Dragging)
 	{
 		Circle uiCircle{ mScreenPos, 30 };
