@@ -9,7 +9,7 @@ struct GroupAnimState
 	double timer = 0.0;
 	double duration = 0.25;
 
-	Vec3 pivotWorldPos;
+	Vec3 pivotWorldPos{ 0, 0, 0 };
 	double startAngle = 0.0;
 	double endAngle = 0.0;
 };

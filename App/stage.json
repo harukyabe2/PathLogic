@@ -72,6 +72,15 @@
           { "x": 0, "y": 0, "type": "Normal", "direction": "Up" },
           { "x": 1, "y": 0, "type": "Arrow", "direction": "Up" }
         ]
+      },
+      {
+        "id": 4,
+        "type": "Slide",
+        "slideDirection": "Left",
+        "pivot": { "x": 0, "y": 0 },
+        "tiles": [
+          { "x": 3, "y": 4, "type": "Normal", "direction": "Up" }
+        ]
       }
     ]
   }

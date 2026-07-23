@@ -220,6 +220,7 @@ void Game::UpdateGame()
 			}
 		}
 
+		// プレイヤーが配置されて再生ボタンが押されたとき
 		if (mState == GameState::Editing && playerState == PlayerState::Placed && mStartButton.leftClicked())
 		{
 			mState = GameState::Simulating;
