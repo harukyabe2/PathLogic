@@ -6,7 +6,14 @@ namespace Utils
 	// 2Dグリッド上で、ピボットを中心に時計回り90度回転させた座標を返す
 	inline Point RotatePointRight(const Point& pos, const Point& pivot)
 	{
-		// x軸右・y軸下向きの時計回り90度回転：(x, y) -> (y, -x)
+		int32 dx = pos.x - pivot.x;
+		int32 dy = pos.y - pivot.y;
+		return Point{ pivot.x - dy, pivot.y + dx };
+	}
+
+	// 2Dグリッド上で、ピボットを中心に反時計回り90度回転させた座標を返す
+	inline Point RotatePointLeft(const Point& pos, const Point& pivot)
+	{
 		int32 dx = pos.x - pivot.x;
 		int32 dy = pos.y - pivot.y;
 		return Point{ pivot.x + dy, pivot.y - dx };

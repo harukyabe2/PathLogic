@@ -127,6 +127,9 @@ Resource(engine/soundfont/GMGSx.sf2.zstdcmp)
 //
 //////////////////////////////////////////////////////
 
+Resource(imgs/right.png)
+Resource(imgs/retry.png)
+
 
 
 /* examples 

@@ -3,14 +3,24 @@
 #include "Player.hpp"
 #include "Board.hpp"
 
+// アニメーションの種類を区別
+enum class PlayerAnimType
+{
+	None,
+	Orbit,
+	Walk,
+	Fall
+};
+
 // アニメーションの状態を管理
 struct PlayerAnimState
 {
-	bool isAnimating = false;
+	PlayerAnimType type = PlayerAnimType::None;
 
 	double timer = 0.0;
 	double duration = 0.25;
 
+	Vec3 startWorldPos;
 	Vec3 pivotWorldPos;
 	Vec3 targetWorldPos;
 
@@ -21,12 +31,22 @@ struct PlayerAnimState
 class PlayerRenderer
 {
 	public:
-		void Update();
+		PlayerRenderer();
+
+		void Update(double dt);
 		void DrawUI(const Player& player) const;
 		void Draw3D(const Player& player, const Board& board) const;
 
 		void StartRotationAnim(const Vec3& pivotWorldPos, const Vec3& targetWorldPos, double startAngle, double endAngle);
+		void StartWalkAnim(const Vec3& startWorldPos, const Vec3& targetWorldPos, double duration = 0.25);
+		void StartFallAnim(const Vec3& startWorldPos, double dropHeight, double duration);
+
+		void StopAnim();
+
+		bool IsAnimating() const;
 
 	private:
 		PlayerAnimState mAnim;
+
+		Model mCharacter;
 };

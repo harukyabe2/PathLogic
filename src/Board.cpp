@@ -17,44 +17,26 @@ void Board::AddGroup(const BlockGroup& group)
 	mGroups.push_back(group);
 }
 
-void Board::RotateGroup(int32 id)
+int32 Board::RotateGroup(int32 id)
 {
 	for (auto& group : mGroups)
 	{
 		if (group.GetID() == id)
 		{
-			if (group.GetType() != GroupType::Rotate) return;
+			if (group.GetType() != GroupType::Rotate) return 0;
 
 			const Point pivot = group.GetPivot();
 			const Array<Point>& currentPositions = group.GetTiles();
+			int32 currentDir = group.GetRotationDirection();
+
 			Array<Point> nextPositions;
 
-			// 回転後の座標を計算
-			for (const auto& pos : currentPositions)
+			if (!CheckRotation(id, pivot, currentDir, currentPositions, nextPositions))
 			{
-				nextPositions.push_back(Utils::RotatePointRight(pos, pivot));
+				currentDir *= -1;
+				if (!CheckRotation(id, pivot, currentDir, currentPositions, nextPositions)) return 0;
+				group.SetRotationDirection(currentDir);
 			}
-
-			// 衝突判定（回転可能か）
-			bool canRotate = true;
-			for (const auto& nextPos : nextPositions)
-			{
-				if (!IsInside(nextPos))
-				{
-					canRotate = false;
-					break;
-				}
-
-				// 移動先に自身のブロックを構成するタイル以外のものがあるか確認
-				int32 targetGroupID = mTiles[nextPos].GetGroupID();
-				if (targetGroupID != -1 && targetGroupID != id)
-				{
-					canRotate = false;
-					break;
-				}
-			}
-
-			if (!canRotate) return;
 
 			Array<Tile> tempTiles;
 
@@ -73,21 +55,64 @@ void Board::RotateGroup(int32 id)
 				const Point& pos = nextPositions[i];
 				Tile& tile = tempTiles[i];
 
-				tile.SetDirection(RotateRight(tile.GetDirection()));
+				if (currentDir == 1) tile.SetDirection(RotateRight(tile.GetDirection()));
+				else tile.SetDirection(RotateLeft(tile.GetDirection()));
+
 				mTiles[pos] = tile;
 			}
 
-			break;
+			return currentDir;
 		}
 	}
+
+	return 0;
 }
 
-void Board::SlideGroup(int32 id, Direction dir)
+Optional<Direction> Board::SlideGroup(int32 id)
 {
 	for (auto& group : mGroups)
 	{
+		if (group.GetID() == id)
+		{
+			if (group.GetType() != GroupType::Slide) return none;
 
+			const Array<Point>& currentPositions = group.GetTiles();
+			Direction currentDir = group.GetSlideDirection();
+
+			Array<Point> nextPositions;
+
+			if (!CheckSlide(id, currentDir, currentPositions, nextPositions))
+			{
+				currentDir = Reverse(currentDir);
+				if (!CheckSlide(id, currentDir, currentPositions, nextPositions)) return none;
+				group.SetSlideDirection(currentDir);
+			}
+
+			Array<Tile> tempTiles;
+
+			// 現在のマス目からブロックをいったん消去
+			for (const auto& pos : currentPositions)
+			{
+				tempTiles.push_back(mTiles[pos]);
+				mTiles[pos] = Tile(TileType::Empty, Direction::Up, -1);
+			}
+
+			group.SetTiles(nextPositions);
+
+			// 新しいマス目にデータを書き込む
+			for (size_t i = 0; i < nextPositions.size(); ++i)
+			{
+				const Point& pos = nextPositions[i];
+				Tile& tile = tempTiles[i];
+
+				mTiles[pos] = tile;
+			}
+
+			return currentDir;
+		}
 	}
+
+	return none;
 }
 
 bool Board::IsInside(const Point& point) const
@@ -105,7 +130,7 @@ Vec3 Board::ToWorldPosition(const Point& point) const
 	return {
 			point.x * blockSize - offsetX,
 			2,
-			point.y * blockSize - offsetZ
+			offsetZ - point.y * blockSize 
 	};
 }
 
@@ -150,4 +175,95 @@ Optional<int32> Board::Raycast(const Ray& ray) const
 	}
 
 	return none;
+}
+
+bool Board::CheckRotation(int32 id, const Point& pivot, int32 dir, const Array<Point>& currentPositions, Array<Point>& nextPositions)
+{
+	nextPositions.clear();
+	bool canRotate = true;
+
+	for (size_t i = 0; i < currentPositions.size(); ++i)
+	{
+		const Point& pos = currentPositions[i];
+
+		// 回転の向きによって移動後の位置を計算
+		Point nextPos = (dir == 1) ?
+			Utils::RotatePointRight(pos, pivot)
+			: Utils::RotatePointLeft(pos, pivot);
+
+		if (!IsInside(nextPos))
+		{
+			canRotate = false;
+			break;
+		}
+
+		const Tile& targetTile = mTiles[nextPos];
+		int32 targetGroupID = targetTile.GetGroupID();
+		TileType targetType = targetTile.GetType();
+
+		// 移動先に自身のブロックを構成するタイル以外のものがあるか確認
+		if (targetGroupID != id && targetType != TileType::Empty)
+		{
+			canRotate = false;
+			break;
+		}
+
+		// 現在の位置で隣接するタイルが自身のブロックを構成する以外のものなら回転を不可にする
+		if (Abs(pos.x - nextPos.x) == 1 && Abs(pos.y - nextPos.y) == 1)
+		{
+			Point corner1{ pos.x, nextPos.y };
+			Point corner2{ nextPos.x, pos.y };
+
+			auto checkSweep = [&](const Point& p) {
+				if (!IsInside(p)) return true;
+				const Tile& t = mTiles[p];
+				return (t.GetGroupID() == id || t.GetType() == TileType::Empty);
+			};
+
+			if (!checkSweep(corner1) || !checkSweep(corner2))
+			{
+				canRotate = false;
+				break;
+			}
+		}
+
+		nextPositions.push_back(nextPos);
+	}
+
+	return canRotate;
+}
+
+bool Board::CheckSlide(int32 id, Direction dir, const Array<Point>& currentPositions, Array<Point>& nextPositions)
+{
+	nextPositions.clear();
+	bool canSlide = true;
+
+	for (size_t i = 0; i < currentPositions.size(); ++i)
+	{
+		const Point& pos = currentPositions[i];
+
+		// 移動の向きによって移動後の位置を計算
+		Point nextPos = (pos + GetOffset(dir));
+
+		if (!IsInside(nextPos))
+		{
+			canSlide = false;
+			break;
+		}
+
+		const Tile& targetTile = mTiles[nextPos];
+		int32 targetGroupID = targetTile.GetGroupID();
+		TileType targetType = targetTile.GetType();
+
+		// 移動先に自身のブロックを構成するタイル以外のものがあるか確認
+		if (targetGroupID != id && targetType != TileType::Empty)
+		{
+			canSlide = false;
+			break;
+		}
+
+		nextPositions.push_back(nextPos);
+	}
+
+	return canSlide;
 }

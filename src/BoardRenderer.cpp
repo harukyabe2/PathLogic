@@ -3,14 +3,16 @@
 
 BoardRenderer::BoardRenderer()
 {
-	mArrowBox = Model{ U"ArrowBox.obj" };
+	mArrowBox = Model{ U"obj/ArrowBox.obj" };
 	Model::RegisterDiffuseTextures(mArrowBox, TextureDesc::MippedSRGB);
+	mArrowBoxRotate = Model{ U"obj/ArrowBoxRotate.obj" };
+	Model::RegisterDiffuseTextures(mArrowBoxRotate, TextureDesc::MippedSRGB);
+	mArrowBoxSlide = Model{ U"obj/ArrowBoxSlide.obj" };
+	Model::RegisterDiffuseTextures(mArrowBoxSlide, TextureDesc::MippedSRGB);
 }
 
-void BoardRenderer::Update()
+void BoardRenderer::Update(double dt)
 {
-	double dt = Scene::DeltaTime();
-
 	for (auto& anim : mAnims)
 	{
 		anim.timer += dt;
@@ -28,18 +30,30 @@ void BoardRenderer::Draw(const Board& board) const
 
 	Size size = board.GetSize();
 
+	const Array<BlockGroup> blockGroup = board.GetGroups();
+
 	// 通常タイルの描画
 	for (int y = 0; y < size.y; ++y)
 	{
 		for (int x = 0; x < size.x; ++x)
 		{
 			const Tile& tile = board.GetTile({ x, y });
+			int32 groupID = tile.GetGroupID();
 
 			// Emptyあるいはアニメーション中のタイルはスキップ
 			if (tile.GetType() == TileType::Empty) continue;
-			if (isAnimating(tile.GetGroupID())) continue;
+			if (isAnimating(groupID)) continue;
 
-			DrawSingleTile(tile, board.ToWorldPosition({ x, y }), 0.0);
+			ColorF tileColor = Linear::Palette::White;
+
+			if (groupID != -1)
+			{
+				BlockGroup group = blockGroup[groupID];
+				if (group.GetType() == GroupType::Rotate) tileColor = Linear::Palette::Steelblue;
+				else if (group.GetType() == GroupType::Slide) tileColor = Linear::Palette::Khaki;
+			}
+
+			DrawSingleTile(tile, board.ToWorldPosition({ x, y }), 0.0, tileColor);
 		}
 	}
 
@@ -48,22 +62,56 @@ void BoardRenderer::Draw(const Board& board) const
 	{
 		double progress = Min(anim.timer / anim.duration, 1.0);
 		double e = EaseOutExpo(progress);
-		double angle = Math::Lerp(anim.startAngle, anim.endAngle, e);
 
 		for (const auto& group : board.GetGroups())
 		{
 			if (group.GetID() != anim.groupID) continue;
-			
-			for (const auto& pos : group.GetTiles())
-			{
-				Vec3 center = board.ToWorldPosition(pos);
-				Vec3 currentCenter = Utils::CalcOrbitPosition(anim.pivotWorldPos, center, angle);
-				
-				const Tile& tile = board.GetTile(pos);
 
-				DrawSingleTile(tile, currentCenter, angle);
+			if (group.GetType() == GroupType::Rotate)
+			{
+				double angle = Math::Lerp(anim.startAngle, anim.endAngle, e);
+
+				for (const auto& pos : group.GetTiles())
+				{
+					Vec3 center = board.ToWorldPosition(pos);
+					Vec3 currentCenter = Utils::CalcOrbitPosition(anim.pivotWorldPos, center, angle);
+					
+					const Tile& tile = board.GetTile(pos);
+					int32 groupID = tile.GetGroupID();
+
+					ColorF tileColor = Linear::Palette::White;
+
+					if (groupID != -1)
+					{
+						if (group.GetType() == GroupType::Rotate) tileColor = Linear::Palette::Steelblue;
+					}
+
+					DrawSingleTile(tile, currentCenter, angle, tileColor);
+				}
+				break;
 			}
-			break;
+			else if (group.GetType() == GroupType::Slide)
+			{
+				for (const auto& pos : group.GetTiles())
+				{
+					Vec3 targetCenter = board.ToWorldPosition(pos);
+					Vec3 startCenter = board.ToWorldPosition(pos - GetOffset(group.GetSlideDirection()));
+					Vec3 currentCenter = Math::Lerp(startCenter, targetCenter, e);
+					
+					const Tile& tile = board.GetTile(pos);
+					int32 groupID = tile.GetGroupID();
+
+					ColorF tileColor = Linear::Palette::White;
+
+					if (groupID != -1)
+					{
+						if (group.GetType() == GroupType::Slide) tileColor = Linear::Palette::Khaki;
+					}
+
+					DrawSingleTile(tile, currentCenter, 0.0, tileColor);
+				}
+				break;
+			}
 		}
 	}
 }
@@ -73,7 +121,12 @@ void BoardRenderer::AddRotationAnim(int32 groupID, const Vec3& pivotWorldPos, do
 	mAnims.push_back({ groupID, 0.0, 0.25, pivotWorldPos, startAngle, endAngle });
 }
 
-void BoardRenderer::DrawSingleTile(const Tile& tile, const Vec3& pos, double angleOffset) const
+void BoardRenderer::AddSlideAnim(int32 groupID)
+{
+	mAnims.push_back({ groupID, 0.0, 0.25 });
+}
+
+void BoardRenderer::DrawSingleTile(const Tile& tile, const Vec3& pos, double angleOffset, const ColorF& color) const
 {
 	TileType type = tile.GetType();
 
@@ -83,7 +136,7 @@ void BoardRenderer::DrawSingleTile(const Tile& tile, const Vec3& pos, double ang
 
 	if (type == TileType::Normal)
 	{
-		OrientedBox{ pos, { 1.47, 0.3, 1.47 }, Quaternion::RotateY(finalAngle) }.draw();
+		OrientedBox{ pos, { 1.47, 0.3, 1.47 }, Quaternion::RotateY(finalAngle) }.draw(color);
 	}
 	else if (type == TileType::Goal)
 	{
@@ -91,6 +144,17 @@ void BoardRenderer::DrawSingleTile(const Tile& tile, const Vec3& pos, double ang
 	}
 	else if (type == TileType::Arrow)
 	{
-		mArrowBox.draw(pos, Quaternion::RotateY(finalAngle));
+		if (color == Linear::Palette::White)
+		{
+			mArrowBox.draw(pos, Quaternion::RotateY(finalAngle));
+		}
+		else if (color == Linear::Palette::Steelblue)
+		{
+			mArrowBoxRotate.draw(pos, Quaternion::RotateY(finalAngle));
+		}
+		else
+		{
+			mArrowBoxSlide.draw(pos, Quaternion::RotateY(finalAngle));
+		}
 	}
 }

@@ -10,18 +10,35 @@ Direction RotateLeft(Direction dir)
 	return static_cast<Direction>((static_cast<int>(dir) + 3) % 4);
 }
 
+Direction Reverse(Direction dir)
+{
+	switch (dir)
+	{
+		case Direction::Up:
+			return Direction::Down;
+		case Direction::Right:
+			return Direction::Left;
+		case Direction::Down:
+			return Direction::Up;
+		case Direction::Left:
+			return Direction::Right;
+	}
+
+	return dir;
+}
+
 Point GetOffset(Direction dir)
 {
 	switch (dir)
 	{
 		case Direction::Up:
-			return { 0, -1 };
-		case Direction::Right:
-			return { 1, 0 };
-		case Direction::Down:
 			return { 0, 1 };
-		case Direction::Left:
+		case Direction::Right:
 			return { -1, 0 };
+		case Direction::Down:
+			return { 0, -1 };
+		case Direction::Left:
+			return { 1, 0 };
 	}
 
 	return { 0, 0 };

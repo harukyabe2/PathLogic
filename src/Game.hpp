@@ -10,9 +10,10 @@
 
 enum class GameState
 {
-	isPlaying,
-	isPaused,
-	isGameClear
+	Editing,
+	Simulating,
+	Falling,
+	Result
 };
 
 class Game : public App::Scene
@@ -27,6 +28,9 @@ class Game : public App::Scene
 		void ProcessInput();
 		void UpdateGame();
 
+		// 1マスずつ進めてアニメーションをセット
+		void StepPlayer();
+
 		GameState mState;
 
 		const ColorF mBackgroundColor;
@@ -39,6 +43,12 @@ class Game : public App::Scene
 
 		Player mPlayer;
 		PlayerRenderer mPlayerRenderer;
+		Point mPlayerStartPos;
+		Direction mPlayerStartDir;
+		Direction mDefaultPlayerDir;
+
+		RoundRect mStartButton;
+		RoundRect mRetryButton;
 
 		bool mIsMouseRUp;
 		bool mIsMouseRDown;

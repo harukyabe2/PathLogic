@@ -3,7 +3,7 @@
 
 Player::Player()
 	: mState(PlayerState::InUI)
-	, mUIPos(80, 80)
+	, mUIPos(100, 100)
 	, mScreenPos(mUIPos)
 	, mBoardPos(-1, -1)
 	, mDirection(Direction::Up)

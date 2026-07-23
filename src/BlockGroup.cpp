@@ -5,6 +5,7 @@ BlockGroup::BlockGroup(int32 id, GroupType type, const Array<Point>& tiles, Poin
 	, mType(type)
 	, mTiles(tiles)
 	, mPivot(pivot)
+	, mRotationDir(1)
 {
 
 }

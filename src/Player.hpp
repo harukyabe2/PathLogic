@@ -7,7 +7,8 @@ enum class PlayerState
 	InUI,
 	Dragging,
 	Placed,
-	Walking
+	Walking,
+	Dead
 };
 
 class Player

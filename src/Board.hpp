@@ -11,8 +11,8 @@ class Board
 		void Update();
 
 		void AddGroup(const BlockGroup& group);
-		void RotateGroup(int32 id);
-		void SlideGroup(int32 id, Direction dir);
+		int32 RotateGroup(int32 id);
+		Optional<Direction> SlideGroup(int32 id);
 
 		bool IsInside(const Point& point) const;
 
@@ -22,6 +22,9 @@ class Board
 		Optional<Point> RaycastTile(const Ray& ray) const;
 		// マウスカーソルの位置にあるタイルのグループIDを返す関数
 		Optional<int32> Raycast(const Ray& ray) const;
+
+		bool CheckRotation(int32 id, const Point& pivot, int32 dir, const Array<Point>& currentPositions, Array<Point>& nextPositions);
+		bool CheckSlide(int32 id, Direction dir, const Array<Point>& currentPositions, Array<Point>& nextPositions);
 
 		const Tile& GetTile(const Point& point) const { return mTiles[point]; }
 		const Size GetSize() const { return mTiles.size(); }

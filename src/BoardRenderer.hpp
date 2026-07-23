@@ -19,16 +19,19 @@ class BoardRenderer
 	public:
 		BoardRenderer();
 
-		void Update();
+		void Update(double dt);
 		void Draw(const Board& board) const;
 
 		void AddRotationAnim(int32 groupID, const Vec3& pivotWorldPos, double startAngle, double endAngle);
+		void AddSlideAnim(int32 groupID);
 
 	private:
-		void DrawSingleTile(const Tile& tile, const Vec3& pos, double angleOffset) const;
+		void DrawSingleTile(const Tile& tile, const Vec3& pos, double angleOffset, const ColorF& color) const;
 
 		Array<GroupAnimState> mAnims;
 
 		Model mArrowBox;
+		Model mArrowBoxRotate;
+		Model mArrowBoxSlide;
 };
 

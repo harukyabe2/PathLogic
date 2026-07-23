@@ -1,12 +1,17 @@
 ﻿#include "PlayerRenderer.hpp"
 #include "Utils.hpp"
 
-void PlayerRenderer::Update()
+PlayerRenderer::PlayerRenderer()
 {
-	if (mAnim.isAnimating)
+	mCharacter = Model{ U"obj/Player.obj" };
+}
+
+void PlayerRenderer::Update(double dt)
+{
+	if (IsAnimating())
 	{
-		mAnim.timer += Scene::DeltaTime();
-		if (mAnim.timer >= mAnim.duration) mAnim.isAnimating = false;
+		mAnim.timer += dt;
+		if (mAnim.timer >= mAnim.duration) mAnim.type = PlayerAnimType::None;
 	}
 }
 
@@ -24,30 +29,77 @@ void PlayerRenderer::Draw3D(const Player& player, const Board& board) const
 {
 	PlayerState state = player.GetState();
 
+	if (state == PlayerState::Dead) return;
+
 	// 配置されたら3Dで表示
 	if (state == PlayerState::Placed || state == PlayerState::Walking)
 	{
 		Vec3 drawPos = board.ToWorldPosition(player.GetBoardPos());
 
-		if (mAnim.isAnimating)
+		if (IsAnimating())
 		{
 			double progress = Min(mAnim.timer / mAnim.duration, 1.0);
 			double e = EaseOutExpo(progress);
-			double angle = Math::Lerp(mAnim.startAngle, mAnim.endAngle, e);
 
-			drawPos = Utils::CalcOrbitPosition(mAnim.pivotWorldPos, mAnim.targetWorldPos, angle);
+			if (mAnim.type == PlayerAnimType::Orbit)
+			{
+				double angle = Math::Lerp(mAnim.startAngle, mAnim.endAngle, e);
+				drawPos = Utils::CalcOrbitPosition(mAnim.pivotWorldPos, mAnim.targetWorldPos, angle);
+			}
+			else if (mAnim.type == PlayerAnimType::Walk)
+			{
+				drawPos = Math::Lerp(mAnim.startWorldPos, mAnim.targetWorldPos, e);
+			}
+			else if (mAnim.type == PlayerAnimType::Fall)
+			{
+				double fallEase = EaseInQuad(progress);
+				drawPos = Math::Lerp(mAnim.startWorldPos, mAnim.targetWorldPos, e);
+			}
 		}
 
-		Cylinder{ drawPos + Vec3{ 0, 0.5, 0 }, 0.4, 1.0 }.draw();
+		double angle = GetBaseAngle(player.GetDirection());
+
+		mCharacter.draw(drawPos, Quaternion::RotateY(angle));
+
+		//Cylinder{ drawPos + Vec3{ 0, 0.5, 0 }, 0.4, 1.0 }.draw();
 	}
 }
 
 void PlayerRenderer::StartRotationAnim(const Vec3& pivotWorldPos, const Vec3& targetWorldPos, double startAngle, double endAngle)
 {
-	mAnim.isAnimating = true;
+	mAnim.type = PlayerAnimType::Orbit;
 	mAnim.timer = 0.0;
 	mAnim.pivotWorldPos = pivotWorldPos;
 	mAnim.targetWorldPos = targetWorldPos;
 	mAnim.startAngle = startAngle;
 	mAnim.endAngle = endAngle;
+}
+
+void PlayerRenderer::StartWalkAnim(const Vec3& startWorldPos, const Vec3& targetWorldPos, double duration)
+{
+	mAnim.type = PlayerAnimType::Walk;
+	mAnim.timer = 0.0;
+	mAnim.duration = duration;
+	mAnim.startWorldPos = startWorldPos;
+	mAnim.targetWorldPos = targetWorldPos;
+}
+
+void PlayerRenderer::StartFallAnim(const Vec3& startWorldPos, double dropHeight, double duration)
+{
+	mAnim.type = PlayerAnimType::Fall;
+	mAnim.timer = 0.0;
+	mAnim.duration = duration;
+	mAnim.startWorldPos = startWorldPos;
+	mAnim.targetWorldPos = startWorldPos - Vec3{ 0, dropHeight, 0 };
+}
+
+void PlayerRenderer::StopAnim()
+{
+	mAnim.type = PlayerAnimType::None;
+	mAnim.timer = 0.0;
+}
+
+bool PlayerRenderer::IsAnimating() const
+{
+	return (mAnim.type != PlayerAnimType::None);
 }
