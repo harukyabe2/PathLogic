@@ -142,6 +142,14 @@ void BoardRenderer::DrawSingleTile(const Tile& tile, const Vec3& pos, double ang
 	{
 		OrientedBox{ pos, { 1.47, 0.3, 1.47 }, Quaternion::RotateY(finalAngle) }.draw(Linear::Palette::Blueviolet);
 	}
+	else if (type == TileType::Item)
+	{
+		OrientedBox{ pos, { 1.47, 0.3, 1.47 }, Quaternion::RotateY(finalAngle) }.draw(color);
+		if (!tile.GetIsCollected())
+		{
+			Cylinder{ pos + Vec3{ 0, 0.5, 0 }, 0.4, 1.0 }.draw();
+		}
+	}
 	else if (type == TileType::Arrow)
 	{
 		if (color == Linear::Palette::White)
@@ -157,4 +165,13 @@ void BoardRenderer::DrawSingleTile(const Tile& tile, const Vec3& pos, double ang
 			mArrowBoxSlide.draw(pos, Quaternion::RotateY(finalAngle));
 		}
 	}
+	else if (type == TileType::RotateTrigger)
+	{
+		OrientedBox{ pos, { 1.47, 0.3, 1.47 }, Quaternion::RotateY(finalAngle) }.draw(Linear::Palette::Orangered);
+	}
+	else if (type == TileType::Teleport)
+	{
+		OrientedBox{ pos, { 1.47, 0.3, 1.47 }, Quaternion::RotateY(finalAngle) }.draw(Linear::Palette::Hotpink);
+	}
 }
+

@@ -10,6 +10,8 @@ class Board
 
 		void Update();
 
+		void ResetBoardState();
+
 		void AddGroup(const BlockGroup& group);
 		int32 RotateGroup(int32 id);
 		Optional<Direction> SlideGroup(int32 id);
@@ -26,7 +28,12 @@ class Board
 		bool CheckRotation(int32 id, const Point& pivot, int32 dir, const Array<Point>& currentPositions, Array<Point>& nextPositions);
 		bool CheckSlide(int32 id, Direction dir, const Array<Point>& currentPositions, Array<Point>& nextPositions);
 
+		void RotateAllArrowsRight();
+
+		Optional<Point> FindPairedTeleport(int32 id, const Point& excludePos) const;
+
 		const Tile& GetTile(const Point& point) const { return mTiles[point]; }
+		Tile& GetTile(const Point& point) { return mTiles[point]; }
 		const Size GetSize() const { return mTiles.size(); }
 		const Array<BlockGroup>& GetGroups() const { return mGroups; }
 

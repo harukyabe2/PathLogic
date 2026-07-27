@@ -128,6 +128,7 @@
     <ClCompile Include="src\PlayerManager.cpp" />
     <ClCompile Include="src\PlayerRenderer.cpp" />
     <ClCompile Include="src\StageLoader.cpp" />
+    <ClCompile Include="src\StageSelect.cpp" />
     <ClCompile Include="src\Tile.cpp" />
     <ClCompile Include="src\Title.cpp" />
     <ClCompile Include="stdafx.cpp">
@@ -350,6 +351,7 @@
     <ClInclude Include="src\PlayerManager.hpp" />
     <ClInclude Include="src\PlayerRenderer.hpp" />
     <ClInclude Include="src\StageLoader.hpp" />
+    <ClInclude Include="src\StageSelect.hpp" />
     <ClInclude Include="src\Tile.hpp" />
     <ClInclude Include="src\Title.hpp" />
     <ClInclude Include="src\Utils.hpp" />

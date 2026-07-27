@@ -1,6 +1,7 @@
 ﻿#include <Siv3D.hpp>
 #include "Game.hpp"
 #include "Title.hpp"
+#include "StageSelect.hpp"
 #include "Common.hpp"
 
 bool Initialize();
@@ -11,7 +12,8 @@ void Main()
 	if (!Initialize()) return;
 
 	App manager;
-	//manager.add<Title>(U"Title");
+	manager.add<Title>(U"Title");
+	manager.add<StageSelect>(U"StageSelect");
 	manager.add<Game>(U"Game");
 
 	while (System::Update())
@@ -40,6 +42,7 @@ bool Initialize()
 void LoadData()
 {
 	FontAsset::Register(U"UI", FontMethod::MSDF, 48, Typeface::Bold);
+	FontAsset::Register(U"ButtonUI", FontMethod::MSDF, 32, Typeface::Bold);
 
 	TextureAsset::Register(U"ButtonArrow", Resource(U"imgs/right.png"));
 	TextureAsset::Register(U"ButtonRetry", Resource(U"imgs/retry.png"));

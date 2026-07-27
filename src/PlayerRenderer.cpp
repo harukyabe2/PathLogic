@@ -35,6 +35,7 @@ void PlayerRenderer::Draw3D(const Player& player, const Board& board) const
 	if (state == PlayerState::Placed || state == PlayerState::Walking)
 	{
 		Vec3 drawPos = board.ToWorldPosition(player.GetBoardPos());
+		double spinAngle = 0.0;
 
 		if (IsAnimating())
 		{
@@ -53,13 +54,27 @@ void PlayerRenderer::Draw3D(const Player& player, const Board& board) const
 			else if (mAnim.type == PlayerAnimType::Fall)
 			{
 				double fallEase = EaseInQuad(progress);
-				drawPos = Math::Lerp(mAnim.startWorldPos, mAnim.targetWorldPos, e);
+				drawPos = Math::Lerp(mAnim.startWorldPos, mAnim.targetWorldPos, fallEase);
+			}
+			else if (mAnim.type == PlayerAnimType::TeleportOut)
+			{
+				double teleEase = EaseInQuad(progress);
+				drawPos = Math::Lerp(mAnim.startWorldPos, mAnim.targetWorldPos, teleEase);
+
+				spinAngle = progress * Math::TwoPi * 3.0;
+			}
+			else if (mAnim.type == PlayerAnimType::TeleportIn)
+			{
+				double teleEase = EaseOutQuad(progress);
+				drawPos = Math::Lerp(mAnim.startWorldPos, mAnim.targetWorldPos, teleEase);
+
+				spinAngle = (1.0 - progress) * Math::TwoPi * 3.0;
 			}
 		}
 
-		double angle = GetBaseAngle(player.GetDirection());
+		double baseAngle = GetBaseAngle(player.GetDirection());
 
-		mCharacter.draw(drawPos, Quaternion::RotateY(angle));
+		mCharacter.draw(drawPos, Quaternion::RotateY(baseAngle + spinAngle));
 
 		//Cylinder{ drawPos + Vec3{ 0, 0.5, 0 }, 0.4, 1.0 }.draw();
 	}
@@ -91,6 +106,24 @@ void PlayerRenderer::StartFallAnim(const Vec3& startWorldPos, double dropHeight,
 	mAnim.duration = duration;
 	mAnim.startWorldPos = startWorldPos;
 	mAnim.targetWorldPos = startWorldPos - Vec3{ 0, dropHeight, 0 };
+}
+
+void PlayerRenderer::StartTeleportOutAnim(const Vec3& startWorldPos, const Vec3& targetWorldPos, double duration)
+{
+	mAnim.type = PlayerAnimType::TeleportOut;
+	mAnim.timer = 0.0;
+	mAnim.duration = duration;
+	mAnim.startWorldPos = startWorldPos;
+	mAnim.targetWorldPos = targetWorldPos;
+}
+
+void PlayerRenderer::StartTeleportInAnim(const Vec3& startWorldPos, const Vec3& targetWorldPos, double duration)
+{
+	mAnim.type = PlayerAnimType::TeleportIn;
+	mAnim.timer = 0.0;
+	mAnim.duration = duration;
+	mAnim.startWorldPos = startWorldPos;
+	mAnim.targetWorldPos = targetWorldPos;
 }
 
 void PlayerRenderer::StopAnim()

@@ -9,20 +9,36 @@ Game::Game(const InitData& init)
 	, mCameraController(mRenderTexture.size())
 	, mBoard({ 0, 0 })
 	, mBoardRenderer()
+	, mTotalItems(0)
+	, mCollectedItems(0)
 	, mPlayerRenderer()
 	, mPlayerStartPos({ 0, 0 })
 	, mPlayerStartDir(Direction::Up)
 	, mDefaultPlayerDir(Direction::Up)
+	, mNextTeleportPos({ 0, 0 })
 	, mStartButton{ 1100, 600, 150, 100, 10 }
 	, mRetryButton{ 930, 600, 150, 100, 10 }
+	, mNextButton{ Arg::center = Scene::Center().movedBy(0, -50), 250, 60, 5 }
+	, mQuitButton{ Arg::center = Scene::Center().movedBy(0, 40), 250, 60, 5 }
 	, mIsMouseRUp(false)
 	, mIsMouseRDown(false)
 	, mIsMouseLUp(false)
 	, mIsMouseLDown(false)
 {
-	StageData stageData = StageLoader::Load(U"stage.json");
-
+	// ステージ情報を受け取る
+	int32 stageNum = getData().currentStage;
+	String fileName = U"JSON/stage{}.json"_fmt(stageNum);
+	StageData stageData = StageLoader::Load(fileName);
 	mBoard = std::move(stageData.board);
+
+	for (int y = 0; y < mBoard.GetSize().y; ++y)
+	{
+		for (int x = 0; x < mBoard.GetSize().x; ++x)
+		{
+			if (mBoard.GetTile({ x, y }).GetType() == TileType::Item) ++mTotalItems;
+		}
+	}
+
 	mPlayerStartDir = stageData.playerDirection;
 	mDefaultPlayerDir = mPlayerStartDir;
 	mPlayer.SetDirection(mPlayerStartDir);
@@ -61,6 +77,24 @@ void Game::draw() const
 
 		mRetryButton.draw(Arg::top(0.6, 0.7, 0.8), Arg::bottom(0.3, 0.3, 0.4));
 		TextureAsset(U"ButtonRetry").draw(mRetryButton.x + 20, mRetryButton.y - 5);
+
+		if (mState == GameState::StageClear)
+		{
+			Rect{ 1280, 720 }.draw(ColorF{ 0, 0.5 });
+
+			mNextButton.draw(Arg::top(0.3, 0.4, 0.5), Arg::bottom(0.2, 0.2, 0.3));
+			FontAsset(U"ButtonUI")(U"Next stage").drawAt(mNextButton.center(), Palette::White);
+
+			mQuitButton.draw(Arg::top(0.3, 0.4, 0.5), Arg::bottom(0.2, 0.2, 0.3));
+			FontAsset(U"ButtonUI")(U"Quit game").drawAt(mQuitButton.center(), Palette::White);
+		}
+		else if (mState == GameState::GameClear)
+		{
+			Rect{ 1280, 720 }.draw(ColorF{ 0, 0.5 });
+
+			mQuitButton.movedBy(0, -40).draw(Arg::top(0.3, 0.4, 0.5), Arg::bottom(0.2, 0.2, 0.3));
+			FontAsset(U"ButtonUI")(U"Quit game").drawAt(mQuitButton.center().movedBy(0, -40), Palette::White);
+		}
 	}
 }
 
@@ -97,7 +131,7 @@ void Game::UpdateGame()
 			{
 				const Tile& tile = mBoard.GetTile(*hitPos);
 				
-				// マウスカーソルの指す位置が通常のタイルならそこに配置
+				// マウスカーソルの指す位置がNormalのタイルならそこに配置
 				if (tile.GetType() == TileType::Normal)
 				{
 					mPlayer.SetBoardPos(*hitPos);
@@ -106,7 +140,7 @@ void Game::UpdateGame()
 				}
 			}
 
-			// 通常のタイル以外の位置なら元のUIの位置に戻す
+			// Normalのタイル以外の位置なら元のUIの位置に戻す
 			if (!isPlaced)
 			{
 				mPlayer.SetState(PlayerState::InUI);
@@ -141,6 +175,7 @@ void Game::UpdateGame()
 					Point pivot2D;
 					bool isPlayerOnGroup = false;
 
+					// 左クリックされたブロックのいずれかのタイルにプレイヤーが乗っているか確認
 					for (const auto& group : mBoard.GetGroups())
 					{
 						if (group.GetID() == *clickedGroupID)
@@ -253,9 +288,33 @@ void Game::UpdateGame()
 				const TileType type = currentTile.GetType();
 
 				// 現在のタイルがArrowなら方向を合わせる
-				if (currentTile.GetType() == TileType::Arrow)
+				if (type == TileType::Arrow)
 				{
 					mPlayer.SetDirection(currentTile.GetDirection());
+				}
+				// 現在のタイルがItemならアイテム所持数を増やす
+				else if (type == TileType::Item && !currentTile.GetIsCollected())
+				{
+					Tile& tile = mBoard.GetTile(currentPos);
+					tile.SetIsCollected(true);
+					++mCollectedItems;
+				}
+				// 現在のタイルがRotateTriggerならすべてのArrowタイルの向きを時計回りに90度回転させる
+				else if (type == TileType::RotateTrigger)
+				{
+					mBoard.RotateAllArrowsRight();
+				}
+				else if (type == TileType::Teleport)
+				{
+					if (auto destPos = mBoard.FindPairedTeleport(currentTile.GetTeleportID(), currentPos))
+					{
+						mNextTeleportPos = *destPos;
+						Vec3 startWorldPos = mBoard.ToWorldPosition(currentPos);
+
+						mPlayerRenderer.StartTeleportOutAnim(startWorldPos, startWorldPos + Vec3{ 0, 10.0, 0 }, 0.5);
+						mState = GameState::TeleportingOut;
+						return;
+					}
 				}
 
 				StepPlayer();
@@ -267,12 +326,33 @@ void Game::UpdateGame()
 	{
 		if (!mPlayerRenderer.IsAnimating())
 		{
-			mState = GameState::Result;
+			mState = GameState::GameOver;
 			mPlayer.SetState(PlayerState::Dead);
 		}
 	}
-	// 結果フェーズ
-	else if (mState == GameState::Result)
+	// テレポートフェーズ：消える
+	else if (mState == GameState::TeleportingOut)
+	{
+		if (!mPlayerRenderer.IsAnimating())
+		{
+			mPlayer.SetBoardPos(mNextTeleportPos);
+			Vec3 destWorldPos = mBoard.ToWorldPosition(mNextTeleportPos);
+
+			mPlayerRenderer.StartTeleportInAnim(destWorldPos + Vec3{ 0, 10.0, 0 }, destWorldPos, 0.5);
+			mState = GameState::TeleportingIn;
+		}
+	}
+	// テレポートフェーズ：現れる
+	else if (mState == GameState::TeleportingIn)
+	{
+		if (!mPlayerRenderer.IsAnimating())
+		{
+			mState = GameState::Simulating;
+			StepPlayer();
+		}
+	}
+	// 結果フェーズ：失敗
+	else if (mState == GameState::GameOver)
 	{
 		if (mRetryButton.leftClicked())
 		{
@@ -280,9 +360,33 @@ void Game::UpdateGame()
 
 			mPlayerRenderer.StopAnim();
 
+			// プレイヤーを落下する直前の位置と方向に戻す
 			mPlayer.SetState(PlayerState::Placed);
 			mPlayer.SetBoardPos(mPlayerStartPos);
 			mPlayer.SetDirection(mPlayerStartDir);
+
+			mCollectedItems = 0;
+
+			mBoard.ResetBoardState();
+		}
+	}
+	// 結果フェーズ：成功
+	else if (mState == GameState::StageClear)
+	{
+		if (mNextButton.leftClicked())
+		{
+			changeScene(U"Game");
+		}
+		else if (mQuitButton.leftClicked())
+		{
+			changeScene(U"Title");
+		}
+	}
+	else if (mState == GameState::GameClear)
+	{
+		if (mQuitButton.movedBy(0, -40).leftClicked())
+		{
+			changeScene(U"Title");
 		}
 	}
 }
@@ -303,8 +407,16 @@ void Game::StepPlayer()
 	const Tile& nextTile = mBoard.GetTile(nextPos);
 	TileType type = nextTile.GetType();
 
-	if (type == TileType::Goal)
+	if (type == TileType::Goal && (mCollectedItems >= mTotalItems))
 	{
-		mState = GameState::Result;
+		int32 stageNum = ++getData().currentStage;
+		if (stageNum <= getData().maxStage)
+		{
+			mState = GameState::StageClear;
+		}
+		else
+		{
+			mState = GameState::GameClear;
+		}
 	}
 }

@@ -34,15 +34,26 @@ StageData StageLoader::Load(FilePathView path)
 			TileType tileType = TileType::Normal;
 			if (tileTypeStr == U"Arrow") tileType = TileType::Arrow;
 			else if (tileTypeStr == U"Goal") tileType = TileType::Goal;
+			else if (tileTypeStr == U"Item") tileType = TileType::Item;
+			else if (tileTypeStr == U"RotateTrigger") tileType = TileType::RotateTrigger;
+			else if (tileTypeStr == U"Teleport") tileType = TileType::Teleport;
 			
 			String dirStr = tileJson[U"direction"].getString();
 			Direction dir = Direction::Up;
 			if (dirStr == U"Right") dir = Direction::Right;
 			else if (dirStr == U"Down") dir = Direction::Down;
 			else if (dirStr == U"Left") dir = Direction::Left;
+
+			int32 teleportID = -1;
+			if (tileJson.hasElement(U"teleportID"))
+			{
+				teleportID = tileJson[U"teleportID"].get<int32>();
+			}
 			
 			// グループに属さないため、groupIDは-1を指定する
-			board.SetTile({ x, y }, Tile(tileType, dir, -1));
+			Tile tile(tileType, dir, -1);
+			tile.SetTeleportID(teleportID);
+			board.SetTile({ x, y }, tile);
 		}
 	}
 
@@ -68,6 +79,9 @@ StageData StageLoader::Load(FilePathView path)
 			TileType tileType = TileType::Normal;
 			if (tileTypeStr == U"Arrow") tileType = TileType::Arrow;
 			else if (tileTypeStr == U"Goal") tileType = TileType::Goal;
+			else if (tileTypeStr == U"Item") tileType = TileType::Item;
+			else if (tileTypeStr == U"RotateTrigger") tileType = TileType::RotateTrigger;
+			else if (tileTypeStr == U"Teleport") tileType = TileType::Teleport;
 
 			String dirStr = tileJson[U"direction"].getString();
 			Direction dir = Direction::Up;
@@ -75,7 +89,15 @@ StageData StageLoader::Load(FilePathView path)
 			else if (dirStr == U"Down") dir = Direction::Down;
 			else if (dirStr == U"Left") dir = Direction::Left;
 
-			board.SetTile(pos, Tile(tileType, dir, id));
+			int32 teleportID = -1;
+			if (tileJson.hasElement(U"teleportID"))
+			{
+				teleportID = tileJson[U"teleportID"].get<int32>();
+			}
+			
+			Tile tile(tileType, dir, id);
+			tile.SetTeleportID(teleportID);
+			board.SetTile(pos, tile);
 		}
 
 		BlockGroup group(id, groupType, tilePoints, pivot);

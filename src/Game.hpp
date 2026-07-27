@@ -13,7 +13,11 @@ enum class GameState
 	Editing,
 	Simulating,
 	Falling,
-	Result
+	TeleportingOut,
+	TeleportingIn,
+	GameOver,
+	StageClear,
+	GameClear
 };
 
 class Game : public App::Scene
@@ -41,28 +45,24 @@ class Game : public App::Scene
 		Board mBoard;
 		BoardRenderer mBoardRenderer;
 
+		int32 mTotalItems;
+		int32 mCollectedItems;
+
 		Player mPlayer;
 		PlayerRenderer mPlayerRenderer;
 		Point mPlayerStartPos;
 		Direction mPlayerStartDir;
 		Direction mDefaultPlayerDir;
 
+		Point mNextTeleportPos;
+
 		RoundRect mStartButton;
 		RoundRect mRetryButton;
+		RoundRect mNextButton;
+		RoundRect mQuitButton;
 
 		bool mIsMouseRUp;
 		bool mIsMouseRDown;
 		bool mIsMouseLUp;
 		bool mIsMouseLDown;
 };
-
-
-
-/*
-設計についてのメモ
-タイルは種類・方向・グループIDを持つ
-ブロックグループは塊を作る
-ボードはタイルと塊の管理をしつつ、回転・スライドに対応し、描画もする
-ブロックグループは回転の軸や変換対象のタイル指定をするだけで、
-ボード上での変換はすべてボードが対応
-*/

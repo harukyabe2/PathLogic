@@ -12,6 +12,22 @@ void Board::Update()
 
 }
 
+void Board::ResetBoardState()
+{
+	Size size = GetSize();
+	for (int y = 0; y < size.y; ++y)
+	{
+		for (int x = 0; x < size.x; ++x)
+		{
+			Tile& tile = GetTile({ x, y });
+			TileType type = tile.GetType();
+
+			if (type == TileType::Arrow) tile.ResetDirection();
+			if (type == TileType::Item) tile.SetIsCollected(false);
+		}
+	}
+}
+
 void Board::AddGroup(const BlockGroup& group)
 {
 	mGroups.push_back(group);
@@ -31,6 +47,7 @@ int32 Board::RotateGroup(int32 id)
 
 			Array<Point> nextPositions;
 
+			// 時計回りで回転できるかを確認し、できない場合は反時計回りでも確認する
 			if (!CheckRotation(id, pivot, currentDir, currentPositions, nextPositions))
 			{
 				currentDir *= -1;
@@ -55,8 +72,12 @@ int32 Board::RotateGroup(int32 id)
 				const Point& pos = nextPositions[i];
 				Tile& tile = tempTiles[i];
 
-				if (currentDir == 1) tile.SetDirection(RotateRight(tile.GetDirection()));
-				else tile.SetDirection(RotateLeft(tile.GetDirection()));
+				Direction newDir = (currentDir == 1) ?
+					RotateRight(tile.GetDirection()) :
+					RotateLeft(tile.GetDirection());
+
+				tile.SetDirection(newDir);
+				tile.SetDefaultDirection(newDir);
 
 				mTiles[pos] = tile;
 			}
@@ -81,6 +102,7 @@ Optional<Direction> Board::SlideGroup(int32 id)
 
 			Array<Point> nextPositions;
 
+			// 既定の方向に移動できるか確認し、できない場合は反対方向でも確認する
 			if (!CheckSlide(id, currentDir, currentPositions, nextPositions))
 			{
 				currentDir = Reverse(currentDir);
@@ -213,13 +235,17 @@ bool Board::CheckRotation(int32 id, const Point& pivot, int32 dir, const Array<P
 		{
 			Point corner1{ pos.x, nextPos.y };
 			Point corner2{ nextPos.x, pos.y };
-
+			
 			auto checkSweep = [&](const Point& p) {
-				if (!IsInside(p)) return true;
-				const Tile& t = mTiles[p];
-				return (t.GetGroupID() == id || t.GetType() == TileType::Empty);
+			
+			if (!IsInside(p)) return true;
+			
+			const Tile& t = mTiles[p];
+			
+			return (t.GetGroupID() == id || t.GetType() == TileType::Empty);
+			
 			};
-
+			
 			if (!checkSweep(corner1) || !checkSweep(corner2))
 			{
 				canRotate = false;
@@ -267,3 +293,43 @@ bool Board::CheckSlide(int32 id, Direction dir, const Array<Point>& currentPosit
 
 	return canSlide;
 }
+
+void Board::RotateAllArrowsRight()
+{
+	Size size = GetSize();
+	for (int y = 0; y < size.y; ++y)
+	{
+		for (int x = 0; x < size.x; ++x)
+		{
+			Tile& tile = GetTile({ x, y });
+
+			if (tile.GetType() == TileType::Arrow)
+			{
+				tile.SetDirection(RotateRight(tile.GetDirection()));
+			}
+		}
+	}
+}
+
+Optional<Point> Board::FindPairedTeleport(int32 id, const Point& excludePos) const
+{
+	Size size = GetSize();
+	for (int y = 0; y < size.y; ++y)
+	{
+		for (int x = 0; x < size.x; ++x)
+		{
+			Point checkPos{ x, y };
+			const Tile& tile = GetTile(checkPos);
+
+			if (tile.GetType() == TileType::Teleport &&
+				tile.GetTeleportID() == id &&
+				checkPos != excludePos)
+			{
+				return checkPos;
+			}
+		}
+	}
+
+	return none;
+}
+

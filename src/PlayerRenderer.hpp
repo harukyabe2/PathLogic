@@ -9,7 +9,9 @@ enum class PlayerAnimType
 	None,
 	Orbit,
 	Walk,
-	Fall
+	Fall,
+	TeleportOut,
+	TeleportIn
 };
 
 // アニメーションの状態を管理
@@ -40,6 +42,8 @@ class PlayerRenderer
 		void StartRotationAnim(const Vec3& pivotWorldPos, const Vec3& targetWorldPos, double startAngle, double endAngle);
 		void StartWalkAnim(const Vec3& startWorldPos, const Vec3& targetWorldPos, double duration = 0.25);
 		void StartFallAnim(const Vec3& startWorldPos, double dropHeight, double duration);
+		void StartTeleportOutAnim(const Vec3& startWorldPos, const Vec3& targetWorldPos, double duration);
+		void StartTeleportInAnim(const Vec3& startWorldPos, const Vec3& targetWorldPos, double duration);
 
 		void StopAnim();
 

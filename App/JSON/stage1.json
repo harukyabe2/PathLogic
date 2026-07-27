@@ -1,0 +1,30 @@
+{
+  "player": {
+    "direction": "Right"
+  },
+
+  "board": {
+    "width": 10,
+    "height": 10,
+    "tiles": [
+      { "x": 2, "y": 5, "type": "Arrow", "direction": "Down" },
+
+      { "x": 3, "y": 4, "type": "Normal", "direction": "Up" },
+      { "x": 4, "y": 4, "type": "Normal", "direction": "Up" },
+      { "x": 4, "y": 5, "type": "Normal", "direction": "Up" },
+      { "x": 5, "y": 4, "type": "Normal", "direction": "Up" },
+      { "x": 5, "y": 5, "type": "Normal", "direction": "Up" },
+      { "x": 6, "y": 4, "type": "Normal", "direction": "Up" },
+      { "x": 6, "y": 5, "type": "Normal", "direction": "Up" },
+      { "x": 7, "y": 4, "type": "Normal", "direction": "Up" },
+      { "x": 7, "y": 5, "type": "Normal", "direction": "Up" },
+
+      { "x": 3, "y": 5, "type": "Item", "direction": "Up" },
+
+      { "x": 2, "y": 4, "type": "Goal", "direction": "Up" }
+    ],
+
+    "groups": [
+    ] 
+  }
+}

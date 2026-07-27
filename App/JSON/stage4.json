@@ -25,6 +25,11 @@
       { "x": 7, "y": 7, "type": "Normal", "direction": "Up" },
       { "x": 7, "y": 5, "type": "Normal", "direction": "Up" },
 
+      { "x": 8, "y": 2, "type": "RotateTrigger", "direction": "Up" },
+      { "x": 9, "y": 2, "type": "Arrow", "direction": "Left" },
+      { "x": 9, "y": 3, "type": "Teleport", "direction": "Up", "teleportID": 0 },
+      { "x": 9, "y": 0, "type": "Teleport", "direction": "Up", "teleportID": 0 },
+
       { "x": 2, "y": 9, "type": "Goal", "direction": "Up" }
     ],
     "groups": [
@@ -79,7 +84,7 @@
         "slideDirection": "Left",
         "pivot": { "x": 0, "y": 0 },
         "tiles": [
-          { "x": 3, "y": 4, "type": "Normal", "direction": "Up" }
+          { "x": 3, "y": 4, "type": "Item", "direction": "Up" }
         ]
       }
     ]
