@@ -9,6 +9,10 @@ BoardRenderer::BoardRenderer()
 	Model::RegisterDiffuseTextures(mArrowBoxRotate, TextureDesc::MippedSRGB);
 	mArrowBoxSlide = Model{ U"obj/ArrowBoxSlide.obj" };
 	Model::RegisterDiffuseTextures(mArrowBoxSlide, TextureDesc::MippedSRGB);
+	mKey = Model{ U"obj/Key.obj" };
+	Model::RegisterDiffuseTextures(mKey, TextureDesc::MippedSRGB);
+	mTeleporter = Model{ U"obj/Teleporter.obj" };
+	Model::RegisterDiffuseTextures(mTeleporter, TextureDesc::MippedSRGB);
 }
 
 void BoardRenderer::Update(double dt)
@@ -147,7 +151,8 @@ void BoardRenderer::DrawSingleTile(const Tile& tile, const Vec3& pos, double ang
 		OrientedBox{ pos, { 1.47, 0.3, 1.47 }, Quaternion::RotateY(finalAngle) }.draw(color);
 		if (!tile.GetIsCollected())
 		{
-			Cylinder{ pos + Vec3{ 0, 0.5, 0 }, 0.4, 1.0 }.draw();
+			mKey.draw(pos + Vec3{ 0, 0.1, 0 }, Quaternion::RotateY(finalAngle));
+			// Cylinder{ pos + Vec3{ 0, 0.5, 0 }, 0.4, 1.0 }.draw();
 		}
 	}
 	else if (type == TileType::Arrow)
@@ -171,7 +176,8 @@ void BoardRenderer::DrawSingleTile(const Tile& tile, const Vec3& pos, double ang
 	}
 	else if (type == TileType::Teleport)
 	{
-		OrientedBox{ pos, { 1.47, 0.3, 1.47 }, Quaternion::RotateY(finalAngle) }.draw(Linear::Palette::Hotpink);
+		OrientedBox{ pos, { 1.47, 0.3, 1.47 }, Quaternion::RotateY(finalAngle) }.draw();
+		mTeleporter.draw(pos + Vec3{ 0, 0.1, 0 }, Quaternion::RotateY(finalAngle));
 	}
 }
 

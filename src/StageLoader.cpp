@@ -7,6 +7,8 @@ StageData StageLoader::Load(FilePathView path)
 	Direction playerDir = Direction::Up;
 	String dirStr = json[U"player"][U"direction"].getString();
 
+	int32 totalItems = 0;
+
 	if (dirStr == U"Right") playerDir = Direction::Right;
 	else if (dirStr == U"Down") playerDir = Direction::Down;
 	else if (dirStr == U"Left") playerDir = Direction::Left;
@@ -34,9 +36,13 @@ StageData StageLoader::Load(FilePathView path)
 			TileType tileType = TileType::Normal;
 			if (tileTypeStr == U"Arrow") tileType = TileType::Arrow;
 			else if (tileTypeStr == U"Goal") tileType = TileType::Goal;
-			else if (tileTypeStr == U"Item") tileType = TileType::Item;
 			else if (tileTypeStr == U"RotateTrigger") tileType = TileType::RotateTrigger;
 			else if (tileTypeStr == U"Teleport") tileType = TileType::Teleport;
+			else if (tileTypeStr == U"Item")
+			{
+				tileType = TileType::Item;
+				++totalItems;
+			}
 			
 			String dirStr = tileJson[U"direction"].getString();
 			Direction dir = Direction::Up;
@@ -79,9 +85,13 @@ StageData StageLoader::Load(FilePathView path)
 			TileType tileType = TileType::Normal;
 			if (tileTypeStr == U"Arrow") tileType = TileType::Arrow;
 			else if (tileTypeStr == U"Goal") tileType = TileType::Goal;
-			else if (tileTypeStr == U"Item") tileType = TileType::Item;
 			else if (tileTypeStr == U"RotateTrigger") tileType = TileType::RotateTrigger;
 			else if (tileTypeStr == U"Teleport") tileType = TileType::Teleport;
+			else if (tileTypeStr == U"Item")
+			{
+				tileType = TileType::Item;
+				++totalItems;
+			}
 
 			String dirStr = tileJson[U"direction"].getString();
 			Direction dir = Direction::Up;
@@ -117,5 +127,5 @@ StageData StageLoader::Load(FilePathView path)
 		board.AddGroup(group);
 	}
 
-	return StageData{ std::move(board), playerDir };
+	return StageData{ std::move(board), playerDir, totalItems };
 }

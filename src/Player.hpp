@@ -23,11 +23,13 @@ class Player
 		Vec2 GetScreenPos() const { return mScreenPos; }
 		Point GetBoardPos() const { return mBoardPos; }
 		Direction GetDirection() const { return mDirection; }
+		Vec3 GetDragWorldPos() const { return mDragWorldPos; }
 
 		void SetState(PlayerState state) { mState = state; }
 		void SetScreenPos(const Vec2& pos) { mScreenPos = pos; }
 		void SetBoardPos(const Point& pos) { mBoardPos = pos; }
 		void SetDirection(Direction dir) { mDirection = dir; }
+		void SetDragWorldPos(const Vec3& pos) { mDragWorldPos = pos; }
 
 	private:
 		PlayerState mState;
@@ -37,4 +39,6 @@ class Player
 
 		Point mBoardPos;
 		Direction mDirection;
+
+		Vec3 mDragWorldPos;
 };

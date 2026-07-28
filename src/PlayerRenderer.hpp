@@ -9,6 +9,7 @@ enum class PlayerAnimType
 	None,
 	Orbit,
 	Walk,
+	Slide,
 	Fall,
 	TeleportOut,
 	TeleportIn
@@ -36,11 +37,11 @@ class PlayerRenderer
 		PlayerRenderer();
 
 		void Update(double dt);
-		void DrawUI(const Player& player) const;
 		void Draw3D(const Player& player, const Board& board) const;
 
-		void StartRotationAnim(const Vec3& pivotWorldPos, const Vec3& targetWorldPos, double startAngle, double endAngle);
+		void StartRotationAnim(const Vec3& pivotWorldPos, const Vec3& targetWorldPos, double startAngle, double endAngle, double duration);
 		void StartWalkAnim(const Vec3& startWorldPos, const Vec3& targetWorldPos, double duration = 0.25);
+		void StartSlideAnim(const Vec3& startWorldPos, const Vec3& targetWorldPos, double duration = 0.25);
 		void StartFallAnim(const Vec3& startWorldPos, double dropHeight, double duration);
 		void StartTeleportOutAnim(const Vec3& startWorldPos, const Vec3& targetWorldPos, double duration);
 		void StartTeleportInAnim(const Vec3& startWorldPos, const Vec3& targetWorldPos, double duration);

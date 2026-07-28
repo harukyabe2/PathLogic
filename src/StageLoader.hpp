@@ -6,6 +6,7 @@ struct StageData
 {
 	Board board;
 	Direction playerDirection;
+	int32 totalItems;
 };
 
 class StageLoader

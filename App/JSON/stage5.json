@@ -1,0 +1,121 @@
+{
+  "player": {
+    "direction": "Right"
+  },
+
+  "board": {
+    "width": 10,
+    "height": 10,
+    "tiles": [
+      { "x": 0, "y": 2, "type": "Arrow", "direction": "Up" },
+      { "x": 0, "y": 5, "type": "Arrow", "direction": "Left" },
+      { "x": 1, "y": 5, "type": "Arrow", "direction": "Up" },
+      { "x": 1, "y": 7, "type": "Arrow", "direction": "Up" },
+      { "x": 1, "y": 9, "type": "Arrow", "direction": "Left" },
+      { "x": 3, "y": 1, "type": "Arrow", "direction": "Up" },
+      { "x": 3, "y": 4, "type": "Arrow", "direction": "Up" },
+      { "x": 5, "y": 4, "type": "Arrow", "direction": "Right" },
+      { "x": 5, "y": 5, "type": "Arrow", "direction": "Down" },
+      { "x": 6, "y": 5, "type": "Arrow", "direction": "Right" },
+      { "x": 6, "y": 7, "type": "Arrow", "direction": "Down" },
+      { "x": 6, "y": 9, "type": "Arrow", "direction": "Down" },
+      { "x": 8, "y": 5, "type": "Arrow", "direction": "Left" },
+      { "x": 9, "y": 2, "type": "Arrow", "direction": "Right" },
+      { "x": 9, "y": 5, "type": "Arrow", "direction": "Down" },
+
+      { "x": 0, "y": 3, "type": "Normal", "direction": "Up" },
+      { "x": 0, "y": 4, "type": "Normal", "direction": "Up" },
+      { "x": 1, "y": 2, "type": "Normal", "direction": "Up" },
+      { "x": 1, "y": 6, "type": "Normal", "direction": "Up" },
+      { "x": 1, "y": 8, "type": "Normal", "direction": "Up" },
+      { "x": 2, "y": 9, "type": "Normal", "direction": "Up" },
+      { "x": 3, "y": 2, "type": "Normal", "direction": "Up" },
+      { "x": 3, "y": 5, "type": "Normal", "direction": "Up" },
+      { "x": 3, "y": 9, "type": "Normal", "direction": "Up" },
+      { "x": 4, "y": 9, "type": "Normal", "direction": "Up" },
+      { "x": 5, "y": 7, "type": "Normal", "direction": "Up" },
+      { "x": 5, "y": 9, "type": "Normal", "direction": "Up" },
+      { "x": 6, "y": 6, "type": "Normal", "direction": "Up" },
+      { "x": 9, "y": 3, "type": "Normal", "direction": "Up" },
+      { "x": 9, "y": 4, "type": "Normal", "direction": "Up" },
+
+      { "x": 4, "y": 4, "type": "Goal", "direction": "Up" }
+    ],
+    "groups": [
+      {
+        "id": 0,
+        "type": "Rotate",
+        "slideDirection": "Up",
+        "pivot": { "x": 3, "y": 7 },
+        "tiles": [
+          { "x": 2, "y": 7, "type": "Normal", "direction": "Up" },
+          { "x": 3, "y": 7, "type": "Arrow", "direction": "Right" },
+          { "x": 3, "y": 8, "type": "Normal", "direction": "Up" }
+        ]
+      },
+      {
+        "id": 1,
+        "type": "Rotate",
+        "slideDirection": "Up",
+        "pivot": { "x": 4, "y": 2 },
+        "tiles": [
+          { "x": 4, "y": 2, "type": "Normal", "direction": "Up" },
+          { "x": 5, "y": 2, "type": "Normal", "direction": "Up" }
+        ]
+      },
+      {
+        "id": 2,
+        "type": "Slide",
+        "slideDirection": "Right",
+        "pivot": { "x": 0, "y": 0 },
+        "tiles": [
+          { "x": 5, "y": 1, "type": "Normal", "direction": "Up" },
+          { "x": 6, "y": 1, "type": "Normal", "direction": "Up" },
+          { "x": 7, "y": 1, "type": "Normal", "direction": "Up" }
+        ]
+      },
+      {
+        "id": 3,
+        "type": "Slide",
+        "slideDirection": "Left",
+        "pivot": { "x": 0, "y": 0 },
+        "tiles": [
+          { "x": 5, "y": 3, "type": "Normal", "direction": "Up" }
+        ]
+      },
+      {
+        "id": 4,
+        "type": "Slide",
+        "slideDirection": "Right",
+        "pivot": { "x": 0, "y": 0 },
+        "tiles": [
+          { "x": 6, "y": 8, "type": "Arrow", "direction": "Left" },
+          { "x": 7, "y": 8, "type": "Normal", "direction": "Up" }
+        ]
+      },
+      {
+        "id": 5,
+        "type": "Slide",
+        "slideDirection": "Up",
+        "pivot": { "x": 0, "y": 0 },
+        "tiles": [
+          { "x": 8, "y": 2, "type": "Arrow", "direction": "Right" },
+          { "x": 8, "y": 3, "type": "Normal", "direction": "Up" }
+        ]
+      },
+      {
+        "id": 6,
+        "type": "Rotate",
+        "slideDirection": "Up",
+        "pivot": { "x": 8, "y": 7 },
+        "tiles": [
+          { "x": 7, "y": 7, "type": "Arrow", "direction": "Left" },
+          { "x": 8, "y": 6, "type": "Arrow", "direction": "Up" },
+          { "x": 8, "y": 7, "type": "Normal", "direction": "Up" },
+          { "x": 8, "y": 8, "type": "Arrow", "direction": "Down" },
+          { "x": 9, "y": 7, "type": "Normal", "direction": "Up" }
+        ]
+      }
+    ]
+  }
+}

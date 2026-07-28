@@ -25,23 +25,23 @@ Game::Game(const InitData& init)
 	, mIsMouseLUp(false)
 	, mIsMouseLDown(false)
 {
-	// ステージ情報を受け取る
+	// ステージ情報の読み込み
 	int32 stageNum = getData().currentStage;
 	String fileName = U"JSON/stage{}.json"_fmt(stageNum);
 	StageData stageData = StageLoader::Load(fileName);
-	mBoard = std::move(stageData.board);
 
-	for (int y = 0; y < mBoard.GetSize().y; ++y)
-	{
-		for (int x = 0; x < mBoard.GetSize().x; ++x)
-		{
-			if (mBoard.GetTile({ x, y }).GetType() == TileType::Item) ++mTotalItems;
-		}
-	}
+	mBoard = std::move(stageData.board);
 
 	mPlayerStartDir = stageData.playerDirection;
 	mDefaultPlayerDir = mPlayerStartDir;
 	mPlayer.SetDirection(mPlayerStartDir);
+
+	mTotalItems = stageData.totalItems;
+
+	// 1フレーム目の描画チラつき対策
+	mCameraController.Update(false, false);
+	const Ray uiRay = mCameraController.GetUIRay({ 150.0, 150.0 });
+	mPlayer.SetDragWorldPos(uiRay.point_at(5.0));
 }
 
 void Game::update()
@@ -54,7 +54,9 @@ void Game::draw() const
 {
 	// 3D描画
 	{
-		const ScopedRenderTarget3D target{ mRenderTexture.clear(mBackgroundColor) };
+		mCameraController.ApplyTransform();
+
+		const ScopedRenderTarget3D target{ mRenderTexture.clear(mBackgroundColor)};
 
 		mBoardRenderer.Draw(mBoard);
 
@@ -70,13 +72,13 @@ void Game::draw() const
 
 	// 2D描画
 	{
-		mPlayerRenderer.DrawUI(mPlayer);
-
 		mStartButton.draw(Arg::top(0.6, 0.7, 0.8), Arg::bottom(0.3, 0.3, 0.4));
 		TextureAsset(U"ButtonArrow").scaled(1.5, 0.8).draw(mStartButton.x + 5, mStartButton.y + 10);
 
 		mRetryButton.draw(Arg::top(0.6, 0.7, 0.8), Arg::bottom(0.3, 0.3, 0.4));
 		TextureAsset(U"ButtonRetry").draw(mRetryButton.x + 20, mRetryButton.y - 5);
+
+		RectF{ Arg::center(150.0, 150.0), 150}.drawFrame(5);
 
 		if (mState == GameState::StageClear)
 		{
@@ -119,15 +121,30 @@ void Game::UpdateGame()
 	// 配置フェーズ
 	if (mState == GameState::Editing)
 	{
-		const Ray ray = mCameraController.GetMouseRay();
+		const Ray mouseRay = mCameraController.GetMouseRay();
 		const PlayerState playerState = mPlayer.GetState();
 
-		// つかんでいるプレイヤーを離したとき
+		if (playerState == PlayerState::InUI)
+		{
+			const Ray uiRay = mCameraController.GetUIRay({ 150.0, 150.0 });
+			mPlayer.SetDragWorldPos(uiRay.point_at(5.0));
+		}
+		else if (playerState == PlayerState::Dragging)
+		{
+			const Plane ground{ Vec3{ 0, 3, 0 }, 1000.0 };
+
+			if (const auto distance = mouseRay.intersects(ground))
+			{
+				mPlayer.SetDragWorldPos(mouseRay.point_at(*distance));
+			}
+		}
+
+		// つかんでいるプレイヤーを離す
 		if (playerState == PlayerState::Dragging && mIsMouseLUp)
 		{
 			bool isPlaced = false;
 
-			if (auto hitPos = mBoard.RaycastTile(ray))
+			if (auto hitPos = mBoard.RaycastTile(mouseRay))
 			{
 				const Tile& tile = mBoard.GetTile(*hitPos);
 				
@@ -148,29 +165,51 @@ void Game::UpdateGame()
 			}
 		}
 
-		// プレイヤーをつかんでいない状態で左クリックしたとき
+		// プレイヤーをつかんでいない状態で左クリック
 		if (mIsMouseLDown && playerState != PlayerState::Dragging)
 		{
 			bool isPlayerPickedUp = false;
 
-			// すでに置かれているプレイヤーをつかみ直す
-			if (playerState == PlayerState::Placed)
+			if (playerState == PlayerState::InUI)
 			{
-				Vec3 playerWorldPos = mBoard.ToWorldPosition(mPlayer.GetBoardPos());
-				Cylinder playerCollider{ playerWorldPos + Vec3{ 0, 0.5, 0 }, 0.4, 1.0 };
+				Vec3 playerWorldPos = mPlayer.GetDragWorldPos();
+				Sphere playerCollider{ playerWorldPos, 0.12 };
 
-				if (ray.intersects(playerCollider))
+				if (mouseRay.intersects(playerCollider))
 				{
 					mPlayer.SetState(PlayerState::Dragging);
 					isPlayerPickedUp = true;
 					mPlayer.SetDirection(mDefaultPlayerDir);
+
+					if (const auto distance = mouseRay.intersects(Plane{ Vec3{ 0, 3, 0 }, 1000.0 }))
+					{
+						mPlayer.SetDragWorldPos(mouseRay.point_at(*distance));
+					}
+				}
+			}
+			// 配置済みのプレイヤーをつかみ直す
+			else if (playerState == PlayerState::Placed)
+			{
+				Vec3 playerWorldPos = mBoard.ToWorldPosition(mPlayer.GetBoardPos());
+				Sphere playerCollider{ playerWorldPos + Vec3{ 0, 0.65, 0 }, 0.5 };
+
+				if (mouseRay.intersects(playerCollider))
+				{
+					mPlayer.SetState(PlayerState::Dragging);
+					isPlayerPickedUp = true;
+					mPlayer.SetDirection(mDefaultPlayerDir);
+
+					if (const auto distance = mouseRay.intersects(Plane{ Vec3{ 0, 3, 0 }, 1000.0 }))
+					{
+						mPlayer.SetDragWorldPos(mouseRay.point_at(*distance));
+					}
 				}
 			}
 
 			if (!isPlayerPickedUp)
 			{
-				// 回転・移動に対応したブロックを左クリックしたとき
-				if (auto clickedGroupID = mBoard.Raycast(ray))
+				// 回転・移動に対応したブロックを左クリック
+				if (auto clickedGroupID = mBoard.Raycast(mouseRay))
 				{
 					Point pivot2D;
 					bool isPlayerOnGroup = false;
@@ -199,12 +238,12 @@ void Game::UpdateGame()
 
 					int32 rotDir = mBoard.RotateGroup(*clickedGroupID);
 
-					// 回転
+					// ブロックの回転
 					if (rotDir != 0)
 					{
 						double startAngle = (rotDir == 1) ? -Math::HalfPi : Math::HalfPi;
 
-						// 回転するブロック上にプレイヤーがいた場合は同時に動かす
+						// 回転するブロック上にプレイヤーがいた場合は同時に回転
 						if (isPlayerOnGroup && playerState == PlayerState::Placed)
 						{
 							Point playerPos = mPlayer.GetBoardPos();
@@ -222,14 +261,14 @@ void Game::UpdateGame()
 
 							Vec3 targetWorldPos = mBoard.ToWorldPosition(newPlayerPos);
 
-							mPlayerRenderer.StartRotationAnim(pivot3D, targetWorldPos, startAngle, 0.0);
+							mPlayerRenderer.StartRotationAnim(pivot3D, targetWorldPos, startAngle, 0.0, 0.25);
 
 							mPlayer.SetBoardPos(newPlayerPos);
 						}
 
 						mBoardRenderer.AddRotationAnim(*clickedGroupID, pivot3D, startAngle, 0.0);
 					}
-					// スライド移動
+					// ブロックのスライド移動
 					else
 					{
 						if (auto clickedGroupDir = mBoard.SlideGroup(*clickedGroupID))
@@ -243,7 +282,7 @@ void Game::UpdateGame()
 								Point newPlayerPos = (playerPos + GetOffset(*clickedGroupDir));
 								Vec3 targetWorldPos = mBoard.ToWorldPosition(newPlayerPos);
 
-								mPlayerRenderer.StartWalkAnim(starttWorldPos, targetWorldPos, 0.25);
+								mPlayerRenderer.StartSlideAnim(starttWorldPos, targetWorldPos, 0.25);
 
 								mPlayer.SetBoardPos(newPlayerPos);
 							}
@@ -255,7 +294,7 @@ void Game::UpdateGame()
 			}
 		}
 
-		// プレイヤーが配置されて再生ボタンが押されたとき
+		// プレイヤーが配置済みかつ再生ボタンを押す
 		if (mState == GameState::Editing && playerState == PlayerState::Placed && mStartButton.leftClicked())
 		{
 			mState = GameState::Simulating;
@@ -304,6 +343,7 @@ void Game::UpdateGame()
 				{
 					mBoard.RotateAllArrowsRight();
 				}
+				// 現在のタイルがTeleportならテレポート処理を開始
 				else if (type == TileType::Teleport)
 				{
 					if (auto destPos = mBoard.FindPairedTeleport(currentTile.GetTeleportID(), currentPos))
@@ -315,6 +355,15 @@ void Game::UpdateGame()
 						mState = GameState::TeleportingOut;
 						return;
 					}
+				}
+				// 現在のタイルがゴールかつアイテム所持数がアイテム総数以上ならクリア判定
+				else if (type == TileType::Goal && (mCollectedItems >= mTotalItems))
+				{
+					int32 stageNum = ++getData().currentStage;
+					if (stageNum <= getData().maxStage) mState = GameState::StageClear;
+					else mState = GameState::GameClear;
+
+					return;
 				}
 
 				StepPlayer();
@@ -370,7 +419,7 @@ void Game::UpdateGame()
 			mBoard.ResetBoardState();
 		}
 	}
-	// 結果フェーズ：成功
+	// 結果フェーズ：ステージクリア
 	else if (mState == GameState::StageClear)
 	{
 		if (mNextButton.leftClicked())
@@ -382,6 +431,7 @@ void Game::UpdateGame()
 			changeScene(U"Title");
 		}
 	}
+	// 結果フェーズ：ゲームクリア
 	else if (mState == GameState::GameClear)
 	{
 		if (mQuitButton.movedBy(0, -40).leftClicked())
@@ -403,20 +453,4 @@ void Game::StepPlayer()
 	mPlayerRenderer.StartWalkAnim(start3D, end3D, 0.4);
 
 	mPlayer.SetBoardPos(nextPos);
-
-	const Tile& nextTile = mBoard.GetTile(nextPos);
-	TileType type = nextTile.GetType();
-
-	if (type == TileType::Goal && (mCollectedItems >= mTotalItems))
-	{
-		int32 stageNum = ++getData().currentStage;
-		if (stageNum <= getData().maxStage)
-		{
-			mState = GameState::StageClear;
-		}
-		else
-		{
-			mState = GameState::GameClear;
-		}
-	}
 }

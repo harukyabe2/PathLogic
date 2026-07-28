@@ -7,6 +7,7 @@ Player::Player()
 	, mScreenPos(mUIPos)
 	, mBoardPos(-1, -1)
 	, mDirection(Direction::Up)
+	, mDragWorldPos({ 0, 0, 0 })
 {
 
 }

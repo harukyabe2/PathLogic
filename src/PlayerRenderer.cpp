@@ -15,27 +15,26 @@ void PlayerRenderer::Update(double dt)
 	}
 }
 
-void PlayerRenderer::DrawUI(const Player& player) const
-{
-	PlayerState state = player.GetState();
-
-	if (state == PlayerState::InUI || state == PlayerState::Dragging)
-	{
-		Circle{ player.GetScreenPos(), 30}.draw(Linear::Palette::Orange);
-	}
-}
-
 void PlayerRenderer::Draw3D(const Player& player, const Board& board) const
 {
 	PlayerState state = player.GetState();
 
 	if (state == PlayerState::Dead) return;
 
-	// 配置されたら3Dで表示
+	Vec3 drawPos = Vec3::Zero();
+	double spinAngle = 0.0;
+	double rollingAngle = 0.0;
+
+	double scale = 1.0;
+	Vec3 offset = Vec3::Zero();
+
+	// 状態によって描画する座標を分ける
 	if (state == PlayerState::Placed || state == PlayerState::Walking)
 	{
-		Vec3 drawPos = board.ToWorldPosition(player.GetBoardPos());
-		double spinAngle = 0.0;
+		scale = 1.0;
+		offset = Vec3{ 0, 0.65, 0 };
+
+		drawPos = board.ToWorldPosition(player.GetBoardPos());
 
 		if (IsAnimating())
 		{
@@ -46,10 +45,22 @@ void PlayerRenderer::Draw3D(const Player& player, const Board& board) const
 			{
 				double angle = Math::Lerp(mAnim.startAngle, mAnim.endAngle, e);
 				drawPos = Utils::CalcOrbitPosition(mAnim.pivotWorldPos, mAnim.targetWorldPos, angle);
+
+				spinAngle = angle;
+			}
+			else if (mAnim.type == PlayerAnimType::Slide)
+			{
+				drawPos = Math::Lerp(mAnim.startWorldPos, mAnim.targetWorldPos, e);
 			}
 			else if (mAnim.type == PlayerAnimType::Walk)
 			{
+				e = EaseOutCubic(progress);
 				drawPos = Math::Lerp(mAnim.startWorldPos, mAnim.targetWorldPos, e);
+
+				if (mAnim.type == PlayerAnimType::Walk)
+				{
+					rollingAngle = (1.0 - progress) * Math::TwoPi;
+				}
 			}
 			else if (mAnim.type == PlayerAnimType::Fall)
 			{
@@ -71,19 +82,32 @@ void PlayerRenderer::Draw3D(const Player& player, const Board& board) const
 				spinAngle = (1.0 - progress) * Math::TwoPi * 3.0;
 			}
 		}
-
-		double baseAngle = GetBaseAngle(player.GetDirection());
-
-		mCharacter.draw(drawPos, Quaternion::RotateY(baseAngle + spinAngle));
-
-		//Cylinder{ drawPos + Vec3{ 0, 0.5, 0 }, 0.4, 1.0 }.draw();
 	}
+	// UI待機中やドラッグ中はプレイヤーが保持している座標を使う
+	else if (state == PlayerState::InUI || state == PlayerState::Dragging)
+	{
+		if (state == PlayerState::InUI) scale = 0.12;
+
+		drawPos = player.GetDragWorldPos();
+	}
+
+	double baseAngle = GetBaseAngle(player.GetDirection());
+
+	const Quaternion orientation = Quaternion::RotateX(rollingAngle) *
+			Quaternion::RotateY(baseAngle + spinAngle);
+
+	const Mat4x4 mat = Mat4x4::Scale(scale) 
+					 * Mat4x4::Rotate(orientation) 
+					 * Mat4x4::Translate(drawPos + offset);
+
+	mCharacter.draw(mat);
 }
 
-void PlayerRenderer::StartRotationAnim(const Vec3& pivotWorldPos, const Vec3& targetWorldPos, double startAngle, double endAngle)
+void PlayerRenderer::StartRotationAnim(const Vec3& pivotWorldPos, const Vec3& targetWorldPos, double startAngle, double endAngle, double duration)
 {
 	mAnim.type = PlayerAnimType::Orbit;
 	mAnim.timer = 0.0;
+	mAnim.duration = duration;
 	mAnim.pivotWorldPos = pivotWorldPos;
 	mAnim.targetWorldPos = targetWorldPos;
 	mAnim.startAngle = startAngle;
@@ -93,6 +117,15 @@ void PlayerRenderer::StartRotationAnim(const Vec3& pivotWorldPos, const Vec3& ta
 void PlayerRenderer::StartWalkAnim(const Vec3& startWorldPos, const Vec3& targetWorldPos, double duration)
 {
 	mAnim.type = PlayerAnimType::Walk;
+	mAnim.timer = 0.0;
+	mAnim.duration = duration;
+	mAnim.startWorldPos = startWorldPos;
+	mAnim.targetWorldPos = targetWorldPos;
+}
+
+void PlayerRenderer::StartSlideAnim(const Vec3& startWorldPos, const Vec3& targetWorldPos, double duration)
+{
+	mAnim.type = PlayerAnimType::Slide;
 	mAnim.timer = 0.0;
 	mAnim.duration = duration;
 	mAnim.startWorldPos = startWorldPos;

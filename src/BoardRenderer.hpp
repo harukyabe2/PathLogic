@@ -33,5 +33,7 @@ class BoardRenderer
 		Model mArrowBox;
 		Model mArrowBoxRotate;
 		Model mArrowBoxSlide;
+		Model mKey;
+		Model mTeleporter;
 };
 

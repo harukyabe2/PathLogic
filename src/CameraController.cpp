@@ -3,7 +3,7 @@
 CameraController::CameraController(const Size& sceneSize)
 : mCursorPos(Scene::Center())
 , mVerticalFOV(20_deg)
-, mEyePosition({ 64, 8, 64 })
+, mEyePosition(Spherical{ 40, 60_deg, 290_deg })
 , mFocusPosition({ 0, 0, 0 })
 , mPhi(-20_deg)
 , mTheta(60_deg)
@@ -33,5 +33,9 @@ void CameraController::Update(const bool isMouseRUp, const bool isMouseRDown)
 
 	mEyePosition = Spherical{ 40, mTheta, (270_deg - mPhi) };
 	mCamera.setView(mEyePosition, mFocusPosition);
+}
+
+void CameraController::ApplyTransform() const
+{
 	Graphics3D::SetCameraTransform(mCamera);
 }
