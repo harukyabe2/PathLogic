@@ -34,6 +34,7 @@ class BoardRenderer
 		Model mArrowBoxRotate;
 		Model mArrowBoxSlide;
 		Model mKey;
-		Model mTeleporter;
+		Model mRotateTrigger;
+		Array<Model> mTeleporters;
 };
 

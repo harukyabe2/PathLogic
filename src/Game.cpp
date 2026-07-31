@@ -62,8 +62,8 @@ void Game::draw() const
 
 		mPlayerRenderer.Draw3D(mPlayer, mBoard);
 
-		Line3D{ Vec3{ 0, -5, -100 }, Vec3{ 0, -5, 100} }.draw();
-		Line3D{ Vec3{ -100, -5, 0 }, Vec3{ 100, -5, 0 } }.draw();
+		//Line3D{ Vec3{ 0, -5, -100 }, Vec3{ 0, -5, 100 } }.draw();
+		//Line3D{ Vec3{ -100, -5, 0 }, Vec3{ 100, -5, 0 } }.draw();
 	}
 
 	Graphics3D::Flush();
@@ -117,6 +117,30 @@ void Game::UpdateGame()
 	double dt = Scene::DeltaTime();
 	mBoardRenderer.Update(dt);
 	mPlayerRenderer.Update(dt);
+
+	// 配置フェーズとリザルト画面以外ではいつでもリトライ可能にする
+	if (mState == GameState::Simulating || mState == GameState::Falling || 
+		mState == GameState::TeleportingOut || mState == GameState::TeleportingIn ||
+		mState == GameState::GameOver)
+	{
+		if (mRetryButton.leftClicked())
+		{
+			mState = GameState::Editing;
+
+			mPlayerRenderer.StopAnim();
+
+			// プレイヤーを直前の位置と方向に戻す
+			mPlayer.SetState(PlayerState::Placed);
+			mPlayer.SetBoardPos(mPlayerStartPos);
+			mPlayer.SetDirection(mPlayerStartDir);
+
+			mCollectedItems = 0;
+
+			mBoard.ResetBoardState();
+
+			return;
+		}
+	}
 
 	// 配置フェーズ
 	if (mState == GameState::Editing)
@@ -180,6 +204,7 @@ void Game::UpdateGame()
 					mPlayer.SetState(PlayerState::Dragging);
 					isPlayerPickedUp = true;
 					mPlayer.SetDirection(mDefaultPlayerDir);
+					AudioAsset(U"Grab").playOneShot();
 
 					if (const auto distance = mouseRay.intersects(Plane{ Vec3{ 0, 3, 0 }, 1000.0 }))
 					{
@@ -198,6 +223,7 @@ void Game::UpdateGame()
 					mPlayer.SetState(PlayerState::Dragging);
 					isPlayerPickedUp = true;
 					mPlayer.SetDirection(mDefaultPlayerDir);
+					AudioAsset(U"Grab").playOneShot();
 
 					if (const auto distance = mouseRay.intersects(Plane{ Vec3{ 0, 3, 0 }, 1000.0 }))
 					{
@@ -309,6 +335,25 @@ void Game::UpdateGame()
 	// 再生フェーズ
 	else if (mState == GameState::Simulating)
 	{
+		// SEや見た目のズレをなくすため、アイテムはアニメーション中に先取り取得する
+		if (mPlayerRenderer.IsAnimating() && mPlayerRenderer.GetAnimProgress() >= 0.3)
+		{
+			Point currentPos = mPlayer.GetBoardPos();
+
+			if (mBoard.IsInside(currentPos))
+			{
+				Tile& tile = mBoard.GetTile(currentPos);
+
+				// タイルが未取得のItemならアイテム所持数を増やす
+				if (tile.GetType() == TileType::Item && !tile.GetIsCollected())
+				{
+					tile.SetIsCollected(true);
+					++mCollectedItems;
+					AudioAsset(U"GetItem").playOneShot();
+				}
+			}
+		}
+
 		if (!mPlayerRenderer.IsAnimating())
 		{
 			Point currentPos = mPlayer.GetBoardPos();
@@ -320,6 +365,7 @@ void Game::UpdateGame()
 				mPlayerRenderer.StartFallAnim(fallStart, 15.0, 1.0);
 
 				mState = GameState::Falling;
+				AudioAsset(U"Fall").playOneShot();
 			}
 			else
 			{
@@ -330,13 +376,6 @@ void Game::UpdateGame()
 				if (type == TileType::Arrow)
 				{
 					mPlayer.SetDirection(currentTile.GetDirection());
-				}
-				// 現在のタイルがItemならアイテム所持数を増やす
-				else if (type == TileType::Item && !currentTile.GetIsCollected())
-				{
-					Tile& tile = mBoard.GetTile(currentPos);
-					tile.SetIsCollected(true);
-					++mCollectedItems;
 				}
 				// 現在のタイルがRotateTriggerならすべてのArrowタイルの向きを時計回りに90度回転させる
 				else if (type == TileType::RotateTrigger)
@@ -362,6 +401,8 @@ void Game::UpdateGame()
 					int32 stageNum = ++getData().currentStage;
 					if (stageNum <= getData().maxStage) mState = GameState::StageClear;
 					else mState = GameState::GameClear;
+
+					AudioAsset(U"Goal").playOneShot();
 
 					return;
 				}
@@ -403,21 +444,7 @@ void Game::UpdateGame()
 	// 結果フェーズ：失敗
 	else if (mState == GameState::GameOver)
 	{
-		if (mRetryButton.leftClicked())
-		{
-			mState = GameState::Editing;
 
-			mPlayerRenderer.StopAnim();
-
-			// プレイヤーを落下する直前の位置と方向に戻す
-			mPlayer.SetState(PlayerState::Placed);
-			mPlayer.SetBoardPos(mPlayerStartPos);
-			mPlayer.SetDirection(mPlayerStartDir);
-
-			mCollectedItems = 0;
-
-			mBoard.ResetBoardState();
-		}
 	}
 	// 結果フェーズ：ステージクリア
 	else if (mState == GameState::StageClear)

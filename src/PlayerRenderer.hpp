@@ -50,6 +50,8 @@ class PlayerRenderer
 
 		bool IsAnimating() const;
 
+		double GetAnimProgress() const;
+
 	private:
 		PlayerAnimState mAnim;
 

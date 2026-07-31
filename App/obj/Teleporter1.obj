@@ -1,6 +1,6 @@
 # Blender 5.1.1
 # www.blender.org
-mtllib Teleporter.mtl
+mtllib Teleporter1.mtl
 o Cylinder.001
 v 0.000000 0.130000 -0.450000
 v 0.000000 0.160000 -0.399758

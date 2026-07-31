@@ -1,0 +1,36 @@
+{
+  "player": {
+    "direction": "Up"
+  },
+
+  "board": {
+    "width": 10,
+    "height": 10,
+    "tiles": [
+      { "x": 4, "y": 2, "type": "Arrow", "direction": "Right" },
+      { "x": 4, "y": 5, "type": "Arrow", "direction": "Up" },
+      { "x": 4, "y": 9, "type": "Arrow", "direction": "Right" },
+      { "x": 7, "y": 5, "type": "Arrow", "direction": "Right" },
+
+      { "x": 4, "y": 3, "type": "Normal", "direction": "Up" },
+      { "x": 4, "y": 4, "type": "Normal", "direction": "Up" },
+      { "x": 4, "y": 7, "type": "Normal", "direction": "Up" },
+      { "x": 5, "y": 2, "type": "Normal", "direction": "Up" },
+      { "x": 5, "y": 5, "type": "Normal", "direction": "Up" },
+      { "x": 6, "y": 2, "type": "Normal", "direction": "Up" },
+      { "x": 6, "y": 5, "type": "Normal", "direction": "Up" },
+      { "x": 7, "y": 2, "type": "Normal", "direction": "Up" },
+      { "x": 7, "y": 3, "type": "Normal", "direction": "Up" },
+      { "x": 7, "y": 4, "type": "Normal", "direction": "Up" },
+      { "x": 8, "y": 2, "type": "Normal", "direction": "Up" },
+
+      { "x": 4, "y": 8, "type": "Item", "direction": "Up" },
+
+      { "x": 4, "y": 6, "type": "RotateTrigger", "direction": "Up" },
+
+      { "x": 9, "y": 2, "type": "Goal", "direction": "Up" }
+    ],
+    "groups": [
+    ]
+  }
+}

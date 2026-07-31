@@ -1,107 +1,49 @@
 {
   "player": {
-    "direction": "Right"
+    "direction": "Down"
   },
+
   "board": {
     "width": 10,
     "height": 10,
     "tiles": [
-      {
-        "x": 1,
-        "y": 5,
-        "type": "Normal",
-        "direction": "Down"
-      },
-      {
-        "x": 5,
-        "y": 5,
-        "type": "Arrow",
-        "direction": "Up"
-      },
-      {
-        "x": 5,
-        "y": 6,
-        "type": "Normal",
-        "direction": "Down"
-      },
-      {
-        "x": 5,
-        "y": 7,
-        "type": "Arrow",
-        "direction": "Left"
-      },
-      {
-        "x": 6,
-        "y": 7,
-        "type": "Normal",
-        "direction": "Down"
-      },
-      {
-        "x": 7,
-        "y": 7,
-        "type": "Goal",
-        "direction": "Down"
-      }
+      { "x": 1, "y": 7, "type": "Arrow", "direction": "Left" },
+      { "x": 3, "y": 6, "type": "Arrow", "direction": "Left" },
+      { "x": 8, "y": 6, "type": "Arrow", "direction": "Down" },
+
+      { "x": 1, "y": 8, "type": "Normal", "direction": "Up" },
+      { "x": 1, "y": 9, "type": "Normal", "direction": "Up" },
+      { "x": 4, "y": 6, "type": "Normal", "direction": "Up" },
+      { "x": 4, "y": 8, "type": "Normal", "direction": "Up" },
+
+      { "x": 8, "y": 6, "type": "Goal", "direction": "Up" }
     ],
 
     "groups": [
       {
         "id": 0,
         "type": "Rotate",
-        "pivot": {
-          "x": 3,
-          "y": 5
-        },
+        "slideDirection": "Up",
+        "pivot": { "x": 3, "y": 7 },
         "tiles": [
-          {
-            "x": 3,
-            "y": 4,
-            "type": "Normal",
-            "direction": "Down"
-          },
-          {
-            "x": 3,
-            "y": 5,
-            "type": "Normal",
-            "direction": "Down"
-          },
-          {
-            "x": 3,
-            "y": 6,
-            "type": "Normal",
-            "direction": "Down"
-          }
+          { "x": 3, "y": 7, "type": "Arrow", "direction": "Right" },
+          { "x": 3, "y": 8, "type": "Normal", "direction": "Up" }
         ]
       },
 
       {
         "id": 1,
         "type": "Rotate",
-        "pivot": {
-          "x": 5,
-          "y": 6
-        },
+        "slideDirection": "Up",
+        "pivot": { "x": 6, "y": 6 },
         "tiles": [
-          {
-            "x": 4,
-            "y": 6,
-            "type": "Normal",
-            "direction": "Down"
-          },
-          {
-            "x": 5,
-            "y": 6,
-            "type": "Normal",
-            "direction": "Down"
-          },
-          {
-            "x": 6,
-            "y": 6,
-            "type": "Normal",
-            "direction": "Down"
-          }
+          { "x": 6, "y": 6, "type": "Arrow", "direction": "Right" },
+          { "x": 5, "y": 6, "type": "Item", "direction": "Up" },
+          { "x": 6, "y": 5, "type": "Normal", "direction": "Up" },
+          { "x": 6, "y": 7, "type": "Normal", "direction": "Up" },
+          { "x": 7, "y": 6, "type": "Normal", "direction": "Up" }
         ]
       }
-    ]
+    ] 
   }
 }

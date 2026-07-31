@@ -1,90 +1,54 @@
 {
   "player": {
-    "direction": "Left"
+    "direction": "Down"
   },
 
   "board": {
     "width": 10,
     "height": 10,
     "tiles": [
-      { "x": 1, "y": 9, "type": "Arrow", "direction": "Left" },
-      { "x": 4, "y": 7, "type": "Arrow", "direction": "Down" },
-      { "x": 4, "y": 6, "type": "Arrow", "direction": "Right" },
-      { "x": 5, "y": 5, "type": "Arrow", "direction": "Left" },
-      { "x": 5, "y": 0, "type": "Arrow", "direction": "Up" },
-      { "x": 8, "y": 5, "type": "Arrow", "direction": "Up" },
+      { "x": 2, "y": 1, "type": "Arrow", "direction": "Left" },
+      { "x": 3, "y": 1, "type": "Arrow", "direction": "Up" },
+      { "x": 3, "y": 5, "type": "Arrow", "direction": "Left" },
+      { "x": 4, "y": 5, "type": "Arrow", "direction": "Up" },
+      { "x": 4, "y": 8, "type": "Arrow", "direction": "Up" },
+      { "x": 4, "y": 7, "type": "Arrow", "direction": "Left" },
+      { "x": 5, "y": 5, "type": "Arrow", "direction": "Down" },
 
-      { "x": 0, "y": 7, "type": "Normal", "direction": "Up" },
-      { "x": 1, "y": 8, "type": "Normal", "direction": "Up" },
-      { "x": 2, "y": 8, "type": "Normal", "direction": "Up" },
-      { "x": 3, "y": 6, "type": "Normal", "direction": "Up" },
-      { "x": 4, "y": 0, "type": "Normal", "direction": "Up" },
-      { "x": 5, "y": 7, "type": "Normal", "direction": "Up" },
-      { "x": 6, "y": 7, "type": "Normal", "direction": "Up" },
+      { "x": 1, "y": 1, "type": "Normal", "direction": "Up" },
+      { "x": 1, "y": 2, "type": "Normal", "direction": "Up" },
+      { "x": 2, "y": 2, "type": "Normal", "direction": "Up" },
+      { "x": 2, "y": 3, "type": "Normal", "direction": "Up" },
+      { "x": 2, "y": 4, "type": "Normal", "direction": "Up" },
+      { "x": 2, "y": 5, "type": "Normal", "direction": "Up" },
+      { "x": 4, "y": 6, "type": "Normal", "direction": "Up" },
+      { "x": 4, "y": 9, "type": "Normal", "direction": "Up" },
+      { "x": 5, "y": 9, "type": "Normal", "direction": "Up" },
+      { "x": 6, "y": 4, "type": "Normal", "direction": "Up" },
       { "x": 6, "y": 5, "type": "Normal", "direction": "Up" },
-      { "x": 7, "y": 7, "type": "Normal", "direction": "Up" },
-      { "x": 7, "y": 5, "type": "Normal", "direction": "Up" },
 
-      { "x": 8, "y": 2, "type": "RotateTrigger", "direction": "Up" },
-      { "x": 9, "y": 2, "type": "Arrow", "direction": "Left" },
-      { "x": 9, "y": 3, "type": "Teleport", "direction": "Up", "teleportID": 0 },
-      { "x": 9, "y": 0, "type": "Teleport", "direction": "Up", "teleportID": 0 },
-
-      { "x": 2, "y": 9, "type": "Goal", "direction": "Up" }
+      { "x": 7, "y": 7, "type": "Goal", "direction": "Up" }
     ],
     "groups": [
       {
         "id": 0,
-        "type": "Rotate",
-        "slideDirection": "Up",
-        "pivot": { "x": 1, "y": 6 },
+        "type": "Slide",
+        "slideDirection": "Right",
+        "pivot": { "x": 0, "y": 0 },
         "tiles": [
-          { "x": 0, "y": 6, "type": "Normal", "direction": "Up" },
-          { "x": 1, "y": 6, "type": "Arrow", "direction": "Down" },
-          { "x": 1, "y": 5, "type": "Normal", "direction": "Up" }
+          { "x": 5, "y": 2, "type": "Normal", "direction": "Up" },
+          { "x": 5, "y": 3, "type": "Normal", "direction": "Up" },
+          { "x": 5, "y": 4, "type": "Normal", "direction": "Up" }
         ]
       },
       {
         "id": 1,
-        "type": "Rotate",
-        "slideDirection": "Up",
-        "pivot": { "x": 5, "y": 2 },
-        "tiles": [
-          { "x": 4, "y": 2, "type": "Normal", "direction": "Up" },
-          { "x": 5, "y": 3, "type": "Normal", "direction": "Up" },
-          { "x": 5, "y": 2, "type": "Normal", "direction": "Up" },
-          { "x": 5, "y": 1, "type": "Normal", "direction": "Up" },
-          { "x": 6, "y": 2, "type": "Normal", "direction": "Up" },
-          { "x": 7, "y": 2, "type": "Normal", "direction": "Up" }
-        ]
-      },
-      {
-        "id": 2,
-        "type": "Rotate",
-        "slideDirection": "Up",
-        "pivot": { "x": 8, "y": 6 },
-        "tiles": [
-          { "x": 8, "y": 6, "type": "Normal", "direction": "Up" },
-          { "x": 9, "y": 6, "type": "Arrow", "direction": "Up" }
-        ]
-      },
-      {
-        "id": 3,
         "type": "Slide",
-        "slideDirection": "Up",
+        "slideDirection": "Down",
         "pivot": { "x": 0, "y": 0 },
         "tiles": [
-          { "x": 0, "y": 0, "type": "Normal", "direction": "Up" },
-          { "x": 1, "y": 0, "type": "Arrow", "direction": "Up" }
-        ]
-      },
-      {
-        "id": 4,
-        "type": "Slide",
-        "slideDirection": "Left",
-        "pivot": { "x": 0, "y": 0 },
-        "tiles": [
-          { "x": 3, "y": 4, "type": "Item", "direction": "Up" }
+          { "x": 5, "y": 8, "type": "Item", "direction": "Up" },
+          { "x": 6, "y": 8, "type": "Normal", "direction": "Up" }
         ]
       }
     ]

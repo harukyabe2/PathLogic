@@ -129,6 +129,10 @@ Resource(engine/soundfont/GMGSx.sf2.zstdcmp)
 
 Resource(imgs/right.png)
 Resource(imgs/retry.png)
+Resource(sounds/Short_Accent06-1(Dry).mp3)
+Resource(sounds/Motion-Falling_Whistle03-2(Low).mp3)
+Resource(sounds/GB-Action01-08(Item).mp3)
+Resource(sounds/Arcade-Action01-4(Score).mp3)
 
 
 

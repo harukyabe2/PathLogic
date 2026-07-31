@@ -47,6 +47,11 @@ void LoadData()
 	TextureAsset::Register(U"ButtonArrow", Resource(U"imgs/right.png"));
 	TextureAsset::Register(U"ButtonRetry", Resource(U"imgs/retry.png"));
 
+	AudioAsset::Register(U"Grab", Resource(U"sounds/Short_Accent06-1(Dry).mp3"));
+	AudioAsset::Register(U"Fall", Resource(U"sounds/Motion-Falling_Whistle03-2(Low).mp3"));
+	AudioAsset::Register(U"GetItem", Resource(U"sounds/GB-Action01-08(Item).mp3"));
+	AudioAsset::Register(U"Goal", Resource(U"sounds/Arcade-Action01-4(Score).mp3"));
+
 	//TextureAsset::Register(U"", Resource(U"imgs/.png"));
 
 	//AudioAsset::Register(U"", Resource(U"sounds/.wav"));

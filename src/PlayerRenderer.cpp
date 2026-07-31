@@ -169,3 +169,9 @@ bool PlayerRenderer::IsAnimating() const
 {
 	return (mAnim.type != PlayerAnimType::None);
 }
+
+double PlayerRenderer::GetAnimProgress() const
+{
+	if (mAnim.duration <= 0.0) return 0.0;
+	return Min(mAnim.timer / mAnim.duration, 1.0);
+}
