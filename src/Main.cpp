@@ -51,6 +51,8 @@ void LoadData()
 	AudioAsset::Register(U"Fall", Resource(U"sounds/Motion-Falling_Whistle03-2(Low).mp3"));
 	AudioAsset::Register(U"GetItem", Resource(U"sounds/GB-Action01-08(Item).mp3"));
 	AudioAsset::Register(U"Goal", Resource(U"sounds/Arcade-Action01-4(Score).mp3"));
+	AudioAsset::Register(U"Teleport", Resource(U"sounds/Motion-Blow_Away01-2(Delay-Down).mp3"));
+	AudioAsset::Register(U"Trigger", Resource(U"sounds/Percussive_Accent07-1(Mid).mp3"));
 
 	//TextureAsset::Register(U"", Resource(U"imgs/.png"));
 

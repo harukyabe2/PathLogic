@@ -381,6 +381,7 @@ void Game::UpdateGame()
 				else if (type == TileType::RotateTrigger)
 				{
 					mBoard.RotateAllArrowsRight();
+					AudioAsset(U"Trigger").playOneShot();
 				}
 				// 現在のタイルがTeleportならテレポート処理を開始
 				else if (type == TileType::Teleport)
@@ -392,6 +393,7 @@ void Game::UpdateGame()
 
 						mPlayerRenderer.StartTeleportOutAnim(startWorldPos, startWorldPos + Vec3{ 0, 10.0, 0 }, 0.5);
 						mState = GameState::TeleportingOut;
+						AudioAsset(U"Teleport").playOneShot();
 						return;
 					}
 				}
