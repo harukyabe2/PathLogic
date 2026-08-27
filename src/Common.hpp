@@ -4,7 +4,7 @@
 struct GameData
 {
 	int32 currentStage = 1;
-	int32 maxStage = 9;
+	int32 maxStage = 10;
 };
 
 using App = SceneManager<String, GameData>;
