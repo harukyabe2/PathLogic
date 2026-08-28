@@ -35,7 +35,7 @@
 <br>
 
 ## 動画<br>
-[![プレイ動画](https://img.youtube.com/vi/fUZvUbDef1w/maxresdefault.jpg)](https://youtu.be/SaILqxR2nNg)
+[![プレイ動画](https://img.youtube.com/vi/SaILqxR2nNg/maxresdefault.jpg)](https://youtu.be/SaILqxR2nNg)
 <br>
 
 ## 作品のコンセプトと面白さ<br>
